@@ -1,0 +1,3 @@
+C:/Users/jayde/CLionProjects/WaterVapor/cmake-build-debug/CMakeFiles/WaterVapor.dir
+C:/Users/jayde/CLionProjects/WaterVapor/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/jayde/CLionProjects/WaterVapor/cmake-build-debug/CMakeFiles/rebuild_cache.dir
