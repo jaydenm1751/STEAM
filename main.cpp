@@ -15,6 +15,8 @@ int main() {
 //    map.search("Caleb");
 //    map.search("aCelb");
 
+    map.InitializeMap("ConsoleStoreGames");
+
     PriorityQ q;
 
     q.insert("Caleb");

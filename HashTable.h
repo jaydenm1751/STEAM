@@ -82,8 +82,9 @@ public:
         }
     }
 
+    //TODO: Add Nodes to the list from .CSV
     void InitializeMap(string fileName) {
-        string path = "C:/Users/caleb/" + fileName + ".csv";
+        string path = "files/" + fileName + ".csv";
         ifstream storeFile(path);
 
         while (true) {
@@ -101,6 +102,7 @@ public:
                     cout << endl;
                 }
                 storeFile.close();
+                break;
             }
         }
     }
