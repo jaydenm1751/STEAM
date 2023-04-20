@@ -34,14 +34,6 @@ private:
         }
         return nullptr;
     }
-public:
-
-    HashTable(){ // hash table with seperate chaining implementation
-        list<Node*> nodes; // empty lists
-        size = 0;
-        capacity = 100;
-        map.resize(capacity, nodes);
-    }
     int hash(string data){ // raw hash index
         int index = 0;
         int power = 1; //power of 2
@@ -55,6 +47,14 @@ public:
         return index;
     }
 
+public:
+
+    HashTable(){ // hash table with seperate chaining implementation
+        list<Node*> nodes; // empty lists
+        size = 0;
+        capacity = 100;
+        map.resize(capacity, nodes);
+    }
     void insert(string data){
         Node* node = new Node;
         node->data = data;
