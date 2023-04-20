@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 #include <list>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -48,7 +50,6 @@ private:
     }
 
 public:
-
     HashTable(){ // hash table with seperate chaining implementation
         list<Node*> nodes; // empty lists
         size = 0;
@@ -78,6 +79,29 @@ public:
             cout << node->data << endl;
         } else {
             cout << "Could not find " << data << ". " << endl;
+        }
+    }
+
+    void InitializeMap(string fileName) {
+        string path = "C:/Users/caleb/" + fileName + ".csv";
+        ifstream storeFile(path);
+
+        while (true) {
+            if (!storeFile.is_open()) {
+                cerr << "Error opening the file:" << path << endl;
+            } else {
+                string line;
+                while(getline(storeFile, line)) {
+                    istringstream line_stream(line);
+                    string cell;
+
+                    while (getline(line_stream, cell, ',')) {
+                        cout << cell << "\t";
+                    }
+                    cout << endl;
+                }
+                storeFile.close();
+            }
         }
     }
 };
