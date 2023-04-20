@@ -3,3 +3,8 @@
 //
 
 #include "StorePage.h"
+
+StorePage::StorePage() {
+    height = width = 1000;
+    color = "Black";
+}
