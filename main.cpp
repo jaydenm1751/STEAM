@@ -1,8 +1,8 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
 #include "HashTable.h"
 #include "HashTableApp.h"
 #include "PriorityQ.h"
+#include <SFML/Graphics.hpp>
 #include <chrono>
 
 using namespace std;
@@ -10,6 +10,47 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/ConsoleStoreGames.csv";
+    ifstream storeFile(path);
+
+    while (true) {
+        if (!storeFile.is_open()) {
+            cerr << "Error opening the file:" << path << endl;
+        } else {
+            string headerLine;
+            getline(storeFile, headerLine);
+
+            string line;
+            while(getline(storeFile, line)) {
+                istringstream line_stream(line);
+                string cell;
+                vector<string> nodeProperties;
+
+                while (getline(line_stream, cell, ',')) {
+                    if(cell.empty()) {
+                        cout << "N/A\t";
+                    }else {
+                        cout << cell << "\t";
+                    }
+                }
+                cout << endl;
+            }
+            storeFile.close();
+            break;
+        }
+    }
+
+    cout << endl;
+    auto end_time = chrono::steady_clock::now();
+    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
+}
+
+//TODO: Implement the App hash table
+void InitializeMapApp(HashTableApp& catalogue) {
+void InitializeMapConsole(HashTableConsole& catalogue) {
+    auto start_time = chrono::steady_clock::now();
+
+    string path = "files/AppStoreGames.csv";
     ifstream storeFile(path);
 
     while (true) {
@@ -45,47 +86,8 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
     cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
 }
 
-//TODO: Implement the App hash table
-void InitializeMapApp(HashTableApp& catalogue) {
-    auto start_time = chrono::steady_clock::now();
-
-    string path = "files/AppStoreGames.csv";
-    ifstream storeFile(path);
-
-    while (true) {
-        if (!storeFile.is_open()) {
-            cerr << "Error opening the file:" << path << endl;
-        } else {
-            string headerLine;
-            getline(storeFile, headerLine);
-
-            string line;
-            while(getline(storeFile, line)) {
-                istringstream line_stream(line);
-                string cell;
-                vector<string> nodeProperties;
-
-                while (getline(line_stream, cell, ',')) {
-                    if(cell.empty()) {
-                        nodeProperties.push_back("N/A");
-                    }else {
-                        nodeProperties.push_back(cell);
-                    }
-                }
-            }
-            storeFile.close();
-            break;
-        }
-    }
-
-    cout << endl;
-    auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
-}
-
 int main() {
-    HashTableApp map;
+    HashTable map;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
@@ -107,6 +109,7 @@ int main() {
 
 
     sf::Font font;
+
     font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
     sf::Text cursor;
     sf::String input = "";
