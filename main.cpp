@@ -5,7 +5,6 @@
 #include <chrono>
 
 using namespace std;
-//TODO: Add Nodes to the list from .CSV
 void InitializeMap(string fileName, HashTable& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
@@ -65,19 +64,13 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
 
     sf::Font font;
+
     font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
-    sf::Text text;
-    text.setFont(font);
-    text.setCharacterSize(20);
-    text.setFillColor(sf::Color::Black);
-    string input;
     sf::Text cursor;
+    sf::String input = "";
     cursor.setFont(font);
     cursor.setCharacterSize(20);
     cursor.setFillColor(sf::Color::Black);
-    sf::Clock backspaceCLK;
-
-//    bool backspaceHeld = false;
 
     while (window.isOpen()){
         sf::Event event{};
@@ -91,26 +84,17 @@ int main() {
             }
             //TODO: put text in box in the center
             if (event.type == sf::Event::TextEntered){
-                if (event.text.unicode < 128){
-                    input += static_cast<char>(event.text.unicode);
+                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)){
+                    input += event.text.unicode;
                     cursor.setString(input + "|");
-                    text.setString(input);
                 }
             }
-            // TODO: fix back space key
             else if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::BackSpace) {
-                    if (backspaceCLK.getElapsedTime().asMilliseconds() > 200 && !input.empty()) {
-                        input.pop_back();
-                        cursor.setString(input +"|");
-                        sf::FloatRect  textRect = cursor.getLocalBounds();
-                        cursor.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
-                    }
-                }
-            }
-            if (event.type == sf::Event::KeyReleased){
-                if (event.key.code == sf::Keyboard::BackSpace){
-//                    backspaceHeld = false;
+                    input = input.substring(0, input.getSize() - 1);
+                    cursor.setString(input + "|");
+//                    sf::FloatRect  textRect = cursor.getLocalBounds();
+//                    cursor.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
                 }
             }
         }
@@ -119,7 +103,7 @@ int main() {
 
         // order should be clear, draw display.
         window.clear(sf::Color::Blue);
-        window.draw(text);
+        window.draw(cursor);
         window.display();
     }
 
