@@ -1,3 +1,10 @@
 # ninja log v5
-5	960	7036704636336364	CMakeFiles/WaterVapor.dir/main.cpp.obj	6af0d10143429f26
-961	1204	7036704638682212	WaterVapor.exe	def321f7ace29d2d
+3	794	7037172065943522	CMakeFiles/WaterVapor.dir/main.cpp.obj	3972e50e3689a45e
+795	1051	7037172068458007	WaterVapor.exe	9ca270a5c5f1766a
+15	165	7036735202554509	CMakeFiles/WaterVapor.dir/ExcelReader.cpp.obj	7b9ed766e29acc4a
+33	680	7037174013609598	build.ninja	1b962919f10d113
+9	486	7037168989356964	CMakeFiles/WaterVapor.dir/StorePage.cpp.obj	7d1476869f87c12a
+3	972	7037193689464505	CMakeFiles/WaterVapor.dir/main.cpp.obj	3972e50e3689a45e
+973	1367	7037193693354834	WaterVapor.exe	9ca270a5c5f1766a
+3	762	7037193924796488	CMakeFiles/WaterVapor.dir/main.cpp.obj	3972e50e3689a45e
+763	1010	7037193927220490	WaterVapor.exe	9ca270a5c5f1766a

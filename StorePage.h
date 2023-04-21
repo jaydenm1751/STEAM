@@ -5,10 +5,14 @@
 #ifndef WATERVAPOR_STOREPAGE_H
 #define WATERVAPOR_STOREPAGE_H
 
+#include <iostream>
+#include <iomanip>
 
-class StorePage {
 
+struct StorePage {
+    int height, width;
+    std::string color;
+    StorePage();
 };
-
 
 #endif //WATERVAPOR_STOREPAGE_H
