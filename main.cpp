@@ -1,8 +1,8 @@
 #include <iostream>
+#include <SFML/Graphics.hpp>
 #include "HashTable.h"
 #include "HashTableApp.h"
 #include "PriorityQ.h"
-#include <SFML/Graphics.hpp>
 #include <chrono>
 
 using namespace std;
@@ -32,6 +32,7 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
                         nodeProperties.push_back(cell);
                     }
                 }
+                cout << endl;
             }
             storeFile.close();
             break;

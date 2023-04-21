@@ -32,7 +32,7 @@ private:
         return root;
     }
     //TODO: fix minheap rep
-    //heapify doesnt seem to work
+    //heapify doesn't seem to work
     void heapify(int index){
         int left = leftChild(index);
         int right = rightChild(index);
