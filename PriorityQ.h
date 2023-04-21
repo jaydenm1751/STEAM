@@ -39,9 +39,9 @@ private:
         int min = index;
 
         //these dont change??
-        if (left < size && pQ[left]->score < pQ[index]->score){
+        if (left < size && pQ[left]->score < pQ[min]->score){
             min = left;
-        } if (right < size && pQ[right]->score < pQ[index]->score){
+        } if (right < size && pQ[right]->score < pQ[min]->score){
             min = right;
         }
         if (min != index){ //never enters this if statement??

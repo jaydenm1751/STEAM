@@ -94,59 +94,62 @@ int main() {
 
     PriorityQ q;
 
-    q.insert("Caleb");
-    q.insert("Jayden");
-    q.insert("Maxwell");
+    q.insert("A");
+    q.insert("B");
+    q.insert("D");
+    q.insert("H");
+    q.insert("C");
     q.insert("Anthony");
     q.extractedVal();
     q.extractedVal();
+    q.extractedVal();
 
-    sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
-    InitializeMapApp(map);
-
-
-    sf::Font font;
-
-    font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
-    sf::Text cursor;
-    sf::String input = "";
-    cursor.setFont(font);
-    cursor.setCharacterSize(20);
-    cursor.setFillColor(sf::Color::Black);
-
-    while (window.isOpen()){
-        sf::Event event{};
-        while(window.pollEvent(event)){
-            if (event.type == sf::Event::Closed){
-                window.close();
-            }
-            if (event.type == sf::Event::MouseButtonPressed){
-                sf::Vector2i coordinates = sf::Mouse::getPosition(window);
-                cout << coordinates.x << ", " << coordinates.y << endl;
-            }
-            //TODO: put text in box in the center
-            if (event.type == sf::Event::TextEntered){
-                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
-                || isspace(event.text.unicode)){
-                    input += event.text.unicode;
-                    cursor.setString(input + "|");
-                }
-            }
-            else if (event.type == sf::Event::KeyPressed){
-                if (event.key.code == sf::Keyboard::BackSpace) {
-                    input = input.substring(0, input.getSize() - 1);
-                    cursor.setString(input + "|");
-                }
-            }
-        }
-
-
-
-        // order should be clear, draw display.
-        window.clear(sf::Color::Blue);
-        window.draw(cursor);
-        window.display();
-    }
+//    sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
+//    InitializeMapApp(map);
+//
+//
+//    sf::Font font;
+//
+//    font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
+//    sf::Text cursor;
+//    sf::String input = "";
+//    cursor.setFont(font);
+//    cursor.setCharacterSize(20);
+//    cursor.setFillColor(sf::Color::Black);
+//
+//    while (window.isOpen()){
+//        sf::Event event{};
+//        while(window.pollEvent(event)){
+//            if (event.type == sf::Event::Closed){
+//                window.close();
+//            }
+//            if (event.type == sf::Event::MouseButtonPressed){
+//                sf::Vector2i coordinates = sf::Mouse::getPosition(window);
+//                cout << coordinates.x << ", " << coordinates.y << endl;
+//            }
+//            //TODO: put text in box in the center
+//            if (event.type == sf::Event::TextEntered){
+//                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
+//                || isspace(event.text.unicode)){
+//                    input += event.text.unicode;
+//                    cursor.setString(input + "|");
+//                }
+//            }
+//            else if (event.type == sf::Event::KeyPressed){
+//                if (event.key.code == sf::Keyboard::BackSpace) {
+//                    input = input.substring(0, input.getSize() - 1);
+//                    cursor.setString(input + "|");
+//                }
+//            }
+//        }
+//
+//
+//
+//        // order should be clear, draw display.
+//        window.clear(sf::Color::Blue);
+//        window.draw(cursor);
+//        window.display();
+//    }
 
 
     return 0;
