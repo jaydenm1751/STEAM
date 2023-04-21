@@ -1,14 +1,55 @@
 #include <iostream>
 #include "HashTable.h"
+#include "HashTableApp.h"
 #include "PriorityQ.h"
 #include <SFML/Graphics.hpp>
 #include <chrono>
 
 using namespace std;
-void InitializeMap(string fileName, HashTable& catalogue) {
+void InitializeMapConsole(HashTableConsole& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
-    string path = "files/" + fileName + ".csv";
+    string path = "files/ConsoleStoreGames.csv";
+    ifstream storeFile(path);
+
+    while (true) {
+        if (!storeFile.is_open()) {
+            cerr << "Error opening the file:" << path << endl;
+        } else {
+            string headerLine;
+            getline(storeFile, headerLine);
+
+            string line;
+            while(getline(storeFile, line)) {
+                istringstream line_stream(line);
+                string cell;
+                vector<string> nodeProperties;
+
+                while (getline(line_stream, cell, ',')) {
+                    if(cell.empty()) {
+                        cout << "N/A\t";
+                    }else {
+                        cout << cell << "\t";
+                    }
+                }
+                cout << endl;
+            }
+            storeFile.close();
+            break;
+        }
+    }
+
+    cout << endl;
+    auto end_time = chrono::steady_clock::now();
+    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
+}
+
+//TODO: Implement the App hash table
+void InitializeMapApp(HashTableApp& catalogue) {
+    auto start_time = chrono::steady_clock::now();
+
+    string path = "files/AppStoreGames.csv";
     ifstream storeFile(path);
 
     while (true) {
@@ -44,7 +85,7 @@ void InitializeMap(string fileName, HashTable& catalogue) {
 }
 
 int main() {
-    HashTable map;
+    HashTableConsole map;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
@@ -62,9 +103,10 @@ int main() {
     q.extractedVal();
 
     sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
+    //InitializeMap("ConsoleStoreGames", map);
+
 
     sf::Font font;
-
     font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
     sf::Text cursor;
     sf::String input = "";
@@ -84,7 +126,8 @@ int main() {
             }
             //TODO: put text in box in the center
             if (event.type == sf::Event::TextEntered){
-                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)){
+                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
+                || isspace(event.text.unicode)){
                     input += event.text.unicode;
                     cursor.setString(input + "|");
                 }
@@ -93,8 +136,6 @@ int main() {
                 if (event.key.code == sf::Keyboard::BackSpace) {
                     input = input.substring(0, input.getSize() - 1);
                     cursor.setString(input + "|");
-//                    sf::FloatRect  textRect = cursor.getLocalBounds();
-//                    cursor.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
                 }
             }
         }
