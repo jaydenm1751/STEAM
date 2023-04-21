@@ -42,6 +42,14 @@ void InitializeMap(string fileName, HashTable& catalogue) {
     auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
     cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
 }
+void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int height){
+    text.setFont(font);
+    text.setFillColor(sf::Color::Black);
+    text.setStyle(sf::Text::Bold);
+    text.setCharacterSize(size);
+    text.setPosition(width, height);
+    text.setString(s);
+}
 
 int main() {
     HashTable map;
@@ -61,16 +69,26 @@ int main() {
     q.extractedVal();
     q.extractedVal();
 
-    sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
+    int width = 1500;
+    int height = 850;
 
+
+    sf::RenderWindow window(sf::VideoMode(width, height), "WaterVapor Gaming");
     sf::Font font;
-
-    font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
+    //font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
+    font.loadFromFile("files/CourierPrime-Regular.ttf");
     sf::Text cursor;
-    sf::String input = "";
     cursor.setFont(font);
     cursor.setCharacterSize(20);
     cursor.setFillColor(sf::Color::Black);
+    sf::String input = "";
+    sf::Text waterVaporText;
+    makeText(waterVaporText, font, "WaterVapor Gaming", 60, height / 2, 100);
+    sf::RectangleShape inputBox(sf::Vector2f(300, 40));
+    inputBox.setPosition((height / 2) + 100, 200);
+    inputBox.setFillColor(sf::Color::White);
+    inputBox.setOutlineThickness(2);
+    inputBox.setOutlineColor(sf::Color::Black);
 
     while (window.isOpen()){
         sf::Event event{};
@@ -82,19 +100,22 @@ int main() {
                 sf::Vector2i coordinates = sf::Mouse::getPosition(window);
                 cout << coordinates.x << ", " << coordinates.y << endl;
             }
-            //TODO: put text in box in the center
             if (event.type == sf::Event::TextEntered){
-                if (isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)){
+                if ((isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
+                    || isspace(event.text.unicode)) && input.getSize() < 25) {
                     input += event.text.unicode;
                     cursor.setString(input + "|");
+                    cursor.setPosition((height / 2) + 100, 200);
                 }
             }
             else if (event.type == sf::Event::KeyPressed){
                 if (event.key.code == sf::Keyboard::BackSpace) {
                     input = input.substring(0, input.getSize() - 1);
                     cursor.setString(input + "|");
-//                    sf::FloatRect  textRect = cursor.getLocalBounds();
-//                    cursor.setOrigin(textRect.left + textRect.width / 2.0f, textRect.top + textRect.height / 2.0f);
+                }
+                if(event.key.code == sf::Keyboard::Enter){
+                    string searchParameter1 = input;
+                    continue;
                 }
             }
         }
@@ -103,6 +124,8 @@ int main() {
 
         // order should be clear, draw display.
         window.clear(sf::Color::Blue);
+        window.draw(waterVaporText);
+        window.draw(inputBox);
         window.draw(cursor);
         window.display();
     }

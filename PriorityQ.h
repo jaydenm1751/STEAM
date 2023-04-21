@@ -31,7 +31,6 @@ private:
         heapify(0);
         return root;
     }
-    //TODO: fix minheap rep
     //heapify doesnt seem to work
     void heapify(int index){
         int left = leftChild(index);
@@ -39,9 +38,9 @@ private:
         int min = index;
 
         //these dont change??
-        if (left < size && pQ[left]->score < pQ[index]->score){
+        if (left < size && pQ[left]->score < pQ[min]->score){
             min = left;
-        } if (right < size && pQ[right]->score < pQ[index]->score){
+        } if (right < size && pQ[right]->score < pQ[min]->score){
             min = right;
         }
         if (min != index){ //never enters this if statement??
