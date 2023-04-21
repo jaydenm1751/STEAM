@@ -14,12 +14,24 @@
 
 using namespace std;
 
-class HashTable{
+class HashTableConsole{
 private:
     struct Node {
         string Title;
-        int players;
-
+        int players{};
+        bool online{};
+        vector<string> genres;
+        string publishers;
+        int review{};
+        float sales{};
+        float price{};
+        string console;
+        char rating{};
+        int release{};
+        float allPlayStyle{};
+        vector<float> completionists;
+        vector<float> storyDLC;
+        vector<float> story;
     };
 
     // hash table
@@ -52,7 +64,7 @@ private:
     }
 
 public:
-    HashTable(){ // hash table with seperate chaining implementation
+    HashTableConsole(){ // hash table with seperate chaining implementation
         list<Node*> nodes; // empty lists
         size = 0;
         capacity = 100;
