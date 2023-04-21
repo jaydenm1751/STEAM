@@ -1,14 +1,15 @@
 #include <iostream>
 #include "HashTable.h"
+#include "HashTableApp.h"
 #include "PriorityQ.h"
 #include <SFML/Graphics.hpp>
 #include <chrono>
 
 using namespace std;
-void InitializeMap(string fileName, HashTable& catalogue) {
+void InitializeMapConsole(HashTableConsole& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
-    string path = "files/" + fileName + ".csv";
+    string path = "files/ConsoleStoreGames.csv";
     ifstream storeFile(path);
 
     while (true) {
@@ -22,15 +23,15 @@ void InitializeMap(string fileName, HashTable& catalogue) {
             while(getline(storeFile, line)) {
                 istringstream line_stream(line);
                 string cell;
+                vector<string> nodeProperties;
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        cout << "N/A\t";
+                        nodeProperties.push_back(("N/A"));
                     }else {
-                        cout << cell << "\t";
+                        nodeProperties.push_back(cell);
                     }
                 }
-                cout << endl;
             }
             storeFile.close();
             break;
@@ -42,17 +43,48 @@ void InitializeMap(string fileName, HashTable& catalogue) {
     auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
     cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
 }
-void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int height){
-    text.setFont(font);
-    text.setFillColor(sf::Color::Black);
-    text.setStyle(sf::Text::Bold);
-    text.setCharacterSize(size);
-    text.setPosition(width, height);
-    text.setString(s);
+
+//TODO: Implement the App hash table
+void InitializeMapApp(HashTableApp& catalogue) {
+    auto start_time = chrono::steady_clock::now();
+
+    string path = "files/AppStoreGames.csv";
+    ifstream storeFile(path);
+
+    while (true) {
+        if (!storeFile.is_open()) {
+            cerr << "Error opening the file:" << path << endl;
+        } else {
+            string headerLine;
+            getline(storeFile, headerLine);
+
+            string line;
+            while(getline(storeFile, line)) {
+                istringstream line_stream(line);
+                string cell;
+                vector<string> nodeProperties;
+
+                while (getline(line_stream, cell, ',')) {
+                    if(cell.empty()) {
+                        nodeProperties.push_back(("N/A"));
+                    }else {
+                        nodeProperties.push_back(cell);
+                    }
+                }
+            }
+            storeFile.close();
+            break;
+        }
+    }
+
+    cout << endl;
+    auto end_time = chrono::steady_clock::now();
+    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
 int main() {
-    HashTable map;
+    HashTableApp map;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
@@ -62,9 +94,11 @@ int main() {
 
     PriorityQ q;
 
-    q.insert("Caleb");
-    q.insert("Jayden");
-    q.insert("Maxwell");
+    q.insert("A");
+    q.insert("B");
+    q.insert("D");
+    q.insert("H");
+    q.insert("C");
     q.insert("Anthony");
     q.extractedVal();
     q.extractedVal();
