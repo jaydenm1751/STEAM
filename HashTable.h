@@ -17,7 +17,9 @@ using namespace std;
 class HashTable{
 private:
     struct Node {
-        string data;
+        string Title;
+        int players;
+
     };
 
     // hash table
@@ -25,22 +27,22 @@ private:
     const float maxLoadFactor = 0.75;
     int size;
     int capacity;
-    Node* searchData(string data){ //called from inside
+    Node* searchData(string title){ //called from inside
         //find index
-        int index = hash(data);
+        int index = hash(title);
         //loop over the specific list in the table
         for (auto iter = map[index].begin(); iter != map[index].end(); iter++){
-            if ((*iter)->data == data){
+            if ((*iter)->Title == title){
                 return *iter; //value found
             }
         }
         return nullptr;
     }
-    int hash(string data){ // raw hash index
+    int hash(string title){ // raw hash index
         int index = 0;
         int power = 1; //power of 2
-        for (int i = 0; i < data.size(); i++){
-            index += power * (data[i]);
+        for (int i = 0; i < title.size(); i++){
+            index += power * (title[i]);
             power *= 2;
         }
         while (index > map.size()){ // make sure the index is valid
@@ -56,10 +58,10 @@ public:
         capacity = 100;
         map.resize(capacity, nodes);
     }
-    void insert(string data){
+    void insert(string title){
         Node* node = new Node;
-        node->data = data;
-        int index = hash(data);
+        node->Title = title;
+        int index = hash(title);
 
         map[index].push_back(node); //append to the list
         size++;
@@ -72,40 +74,16 @@ public:
         }
     }
 
-    void search(string data){ //called from logic of search
-        Node* node = searchData(data);
+    void search(string title){ //called from logic of search
+        Node* node = searchData(title);
         if (node != nullptr){
             //do something with the value found
-            cout << node->data << endl;
+            cout << node->Title << endl;
         } else {
-            cout << "Could not find " << data << ". " << endl;
+            cout << "Could not find " << title << ". " << endl;
         }
     }
 
-    //TODO: Add Nodes to the list from .CSV
-    void InitializeMap(string fileName) {
-        string path = "files/" + fileName + ".csv";
-        ifstream storeFile(path);
-
-        while (true) {
-            if (!storeFile.is_open()) {
-                cerr << "Error opening the file:" << path << endl;
-            } else {
-                string line;
-                while(getline(storeFile, line)) {
-                    istringstream line_stream(line);
-                    string cell;
-
-                    while (getline(line_stream, cell, ',')) {
-                        cout << cell << "\t";
-                    }
-                    cout << endl;
-                }
-                storeFile.close();
-                break;
-            }
-        }
-    }
 };
 
 
