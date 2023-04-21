@@ -27,12 +27,11 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        cout << "N/A\t";
+                        nodeProperties.push_back(("N/A"));
                     }else {
-                        cout << cell << "\t";
+                        nodeProperties.push_back(cell);
                     }
                 }
-                cout << endl;
             }
             storeFile.close();
             break;
@@ -47,7 +46,6 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 
 //TODO: Implement the App hash table
 void InitializeMapApp(HashTableApp& catalogue) {
-void InitializeMapConsole(HashTableConsole& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/AppStoreGames.csv";
@@ -73,7 +71,6 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
                         nodeProperties.push_back(cell);
                     }
                 }
-                cout << endl;
             }
             storeFile.close();
             break;
@@ -82,12 +79,12 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 
     cout << endl;
     auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
+    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
 int main() {
-    HashTable map;
+    HashTableApp map;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
