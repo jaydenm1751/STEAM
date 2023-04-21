@@ -27,12 +27,11 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        cout << "N/A\t";
+                        nodeProperties.push_back(("N/A"));
                     }else {
-                        cout << cell << "\t";
+                        nodeProperties.push_back(cell);
                     }
                 }
-                cout << endl;
             }
             storeFile.close();
             break;
@@ -63,15 +62,15 @@ void InitializeMapApp(HashTableApp& catalogue) {
             while(getline(storeFile, line)) {
                 istringstream line_stream(line);
                 string cell;
+                vector<string> nodeProperties;
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        cout << "N/A\t";
+                        nodeProperties.push_back("N/A");
                     }else {
-                        cout << cell << "\t";
+                        nodeProperties.push_back(cell);
                     }
                 }
-                cout << endl;
             }
             storeFile.close();
             break;
@@ -80,12 +79,12 @@ void InitializeMapApp(HashTableApp& catalogue) {
 
     cout << endl;
     auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
+    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
 int main() {
-    HashTableConsole map;
+    HashTableApp map;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
@@ -103,7 +102,7 @@ int main() {
     q.extractedVal();
 
     sf::RenderWindow window(sf::VideoMode(1500, 850), "WaterVapor Gaming");
-    //InitializeMap("ConsoleStoreGames", map);
+    InitializeMapApp(map);
 
 
     sf::Font font;

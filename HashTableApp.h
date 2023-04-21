@@ -9,20 +9,19 @@ class HashTableApp {
 private:
     struct Node {
         string Title;
-        int players{};
-        bool online{};
+        string url;
+        int ID;
+        string iconURL;
+        float rating;
+        int ratingCount;
+        float price;
+        float inAppPurchases;
+        string Developer;
+        string age;
+        float size;
         vector<string> genres;
-        string publishers;
-        int review{};
-        float sales{};
-        float price{};
-        string console;
-        char rating{};
-        int release{};
-        float allPlayStyle{};
-        vector<float> completionists;
-        vector<float> storyDLC;
-        vector<float> story;
+        string releaseDate;
+        string updateData;
     };
 public:
     HashTableApp() {
