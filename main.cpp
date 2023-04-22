@@ -3,10 +3,12 @@
 #include "HashTableApp.h"
 #include "PriorityQ.h"
 #include <SFML/Graphics.hpp>
+#include <unordered_map>
+#include "ConsoleAppsNodes.cpp"
 #include <chrono>
 
 using namespace std;
-void InitializeMapConsole(HashTableConsole& catalogue) {
+void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/ConsoleStoreGames.csv";
@@ -32,6 +34,7 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
                         nodeProperties.push_back(cell);
                     }
                 }
+                insertConsoleData(nodeProperties, catalogue);
             }
             storeFile.close();
             break;
@@ -45,7 +48,7 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 }
 
 //TODO: Implement the App hash table
-void InitializeMapApp(HashTableApp& catalogue) {
+void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/AppStoreGames.csv";
@@ -92,7 +95,7 @@ void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int
 }
 
 int main() {
-    HashTableApp map;
+    unordered_map<string, ConsoleNode*> ConsoleGames;
 
 //    map.insert("Caleb");
 //    map.insert("Jayden");
@@ -101,6 +104,7 @@ int main() {
 //    map.search("aCelb");
 
     PriorityQ q;
+    InitializeMapConsole(ConsoleGames);
 
     q.insert("A");
     q.insert("B");
@@ -110,6 +114,7 @@ int main() {
     q.insert("Anthony");
     q.extractedVal();
     q.extractedVal();
+    q.extractedVal();
 
     int width = 1500;
     int height = 850;
@@ -117,14 +122,14 @@ int main() {
 
     sf::RenderWindow window(sf::VideoMode(width, height), "WaterVapor Gaming");
     sf::Font font;
-    //font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
     font.loadFromFile("files/CourierPrime-Regular.ttf");
     sf::Text cursor;
-    makeText(cursor, font, "|", 20, (height / 2) + 100, 200);
+    cursor.setFont(font);
+    cursor.setCharacterSize(20);
+    cursor.setFillColor(sf::Color::Black);
     sf::String input = "";
     sf::Text waterVaporText;
     makeText(waterVaporText, font, "WaterVapor Gaming", 60, height / 2, 100);
-
     sf::RectangleShape inputBox(sf::Vector2f(300, 40));
     inputBox.setPosition((height / 2) + 100, 200);
     inputBox.setFillColor(sf::Color::White);
@@ -143,7 +148,7 @@ int main() {
             }
             if (event.type == sf::Event::TextEntered){
                 if ((isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
-                    || isspace(event.text.unicode)) && input.getSize() < 25) {
+                     || isspace(event.text.unicode)) && input.getSize() < 25) {
                     input += event.text.unicode;
                     cursor.setString(input + "|");
                     cursor.setPosition((height / 2) + 100, 200);
