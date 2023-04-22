@@ -83,6 +83,14 @@ void InitializeMapApp(HashTableApp& catalogue) {
     cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
+void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int height){
+    text.setFont(font);
+    text.setCharacterSize(size);
+    text.setFillColor(sf::Color::Black);
+    text.setString(s);
+    text.setPosition(width, height);
+}
+
 int main() {
     HashTableApp map;
 
@@ -112,12 +120,11 @@ int main() {
     //font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
     font.loadFromFile("files/CourierPrime-Regular.ttf");
     sf::Text cursor;
-    cursor.setFont(font);
-    cursor.setCharacterSize(20);
-    cursor.setFillColor(sf::Color::Black);
+    makeText(cursor, font, "|", 20, (height / 2) + 100, 200);
     sf::String input = "";
     sf::Text waterVaporText;
     makeText(waterVaporText, font, "WaterVapor Gaming", 60, height / 2, 100);
+
     sf::RectangleShape inputBox(sf::Vector2f(300, 40));
     inputBox.setPosition((height / 2) + 100, 200);
     inputBox.setFillColor(sf::Color::White);
