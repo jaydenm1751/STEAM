@@ -4,6 +4,8 @@
 #include "PriorityQ.h"
 #include "TextureManager.h"
 #include <SFML/Graphics.hpp>
+#include <unordered_map>
+#include "ConsoleAppsNodes.cpp"
 #include <chrono>
 
 using namespace std;
@@ -36,6 +38,7 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
                         nodeProperties.push_back(cell);
                     }
                 }
+                insertConsoleData(nodeProperties, catalogue);
             }
             storeFile.close();
             break;
@@ -49,7 +52,7 @@ void InitializeMapConsole(HashTableConsole& catalogue) {
 }
 
 //TODO: Implement the App hash table
-void InitializeMapApp(HashTableApp& catalogue) {
+void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/AppStoreGames.csv";
@@ -75,6 +78,9 @@ void InitializeMapApp(HashTableApp& catalogue) {
                         nodeProperties.push_back(cell);
                     }
                 }
+                insertAppData(nodeProperties, catalogue);
+                if (catalogue.size() == 7964)
+                    continue;
             }
             storeFile.close();
             break;
@@ -104,11 +110,9 @@ void makeInputBox(sf::RenderWindow& window, int x, int y){ // initial 525, 200
 }
 
 int main() {
-    HashTableApp map;
-    unordered_map<string, string> searchRes;
-    searchRes["caleb"] = "is gay";
-    searchRes["halo3"] = "call of duty better";
-    searchRes["N/A"] = "fail";
+    unordered_map<string, ConsoleNode*> ConsoleGames;
+    unordered_map<string, AppNode*> AppGames;
+
 //    map.insert("Caleb");
 //    map.insert("Jayden");
 //    map.insert("Maxwell");
@@ -116,6 +120,8 @@ int main() {
 //    map.search("aCelb");
 
     PriorityQ q;
+    InitializeMapConsole(ConsoleGames);
+    //InitializeMapApp(AppGames);
 
     q.insert("A");
     q.insert("B");
@@ -123,6 +129,7 @@ int main() {
     q.insert("H");
     q.insert("C");
     q.insert("Anthony");
+    q.extractedVal();
     q.extractedVal();
     q.extractedVal();
 
