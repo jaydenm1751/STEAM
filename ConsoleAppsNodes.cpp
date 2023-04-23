@@ -16,10 +16,10 @@ struct AppNode {
     int ratingCount;
     float price;
     vector<float> inAppPurchases;
-    string description;
     string developer;
     string age;
-    float size;
+    vector<string> languages;
+    unsigned long long size;
     vector<string> genres;
     string releaseDate;
     string updateData;
@@ -43,9 +43,8 @@ struct ConsoleNode {
     vector<float> story;
 };
 
-
 static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
-    if ((data.at(2).find("\\u") == string::npos) && (data.at(3).find("ht") == 0)) {
+    if ((data.at(2).find("\\u") == string::npos) && (data.at(2).find("\\x") == string::npos) && (data.at(3).find("ht") == 0) && (data.at(2).find("\"") != 0)) {
         string key = data.at(2);
         int index = 7;
         transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -63,8 +62,9 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
             catalogue[key]->ratingCount = 0;
         }
         catalogue[key]->price = stof(data.at(6));
-        if (data.at(7) == "N/A") {
+        if (data.at(index) == "N/A") {
             catalogue[key]->inAppPurchases.push_back(0.0);
+            index++;
         } else {
             if (data.at(index).find("\"") == 0) {
                 catalogue[key]->inAppPurchases.push_back(stof(data.at(index).substr(1)));
@@ -73,6 +73,7 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
                     if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
                         catalogue[key]->inAppPurchases.push_back(
                                 stof(data.at(index).substr(0, data.at(index).size() - 1)));
+                        index++;
                         break;
                     }
                     catalogue[key]->inAppPurchases.push_back(stof(data.at(index)));
@@ -83,6 +84,55 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
                 index++;
             }
         }
+        catalogue[key]->developer = data.at(index);
+        index++;
+        catalogue[key]->age = data.at(index);
+        index++;
+//        vectorParsingAppsString(index, data, catalogue, key);
+        if (data.at(index) == "N/A") {
+            catalogue[key]->languages.emplace_back("Unavailable");
+            index++;
+        } else {
+            if (data.at(index).find("\"") == 0) {
+                catalogue[key]->languages.push_back(data.at(index).substr(1));
+                index++;
+                while (true) {
+                    if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                        catalogue[key]->languages.push_back(data.at(index).substr(0, data.at(index).size() - 1));
+                        index++;
+                        break;
+                    }
+                    catalogue[key]->languages.push_back(data.at(index));
+                    index++;
+                }
+            } else {
+                catalogue[key]->languages.push_back(data.at(index));
+                index++;
+            }
+        }
+        cout << data.at(index) << "\n";
+        catalogue[key]->size = stoull(data.at(index));
+        index++;
+        if (data.at(index) == "N/A") {
+            catalogue[key]->genres.emplace_back("Unavailable");
+        } else {
+            if (data.at(index).find("\"") == 0) {
+                catalogue[key]->genres.push_back(data.at(index).substr(1));
+                index++;
+                while (true) {
+                    if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                        catalogue[key]->genres.push_back(data.at(index).substr(0, data.at(index).size() - 1));
+                        break;
+                    }
+                    catalogue[key]->genres.push_back(data.at(index));
+                    index++;
+                }
+            } else {
+                catalogue[key]->genres.push_back(data.at(index));
+            }
+        }
+        catalogue[key]->releaseDate = data.at(data.size()-2);
+        catalogue[key]->updateData = data.back();
     }
 }
 
@@ -131,6 +181,4 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
     } else {
         catalogue[key]->console.push_back(data.at(data.size() - 13)); //minus 13 because there is unknown amount of genre, so have to index from the back
     }
-
-
 }

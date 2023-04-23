@@ -80,7 +80,7 @@ void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
                     }
                 }
                 insertAppData(nodeProperties, catalogue);
-                if (catalogue.size() == 7964)
+                if (catalogue.size() == 3938)
                     continue;
             }
             storeFile.close();
@@ -121,8 +121,8 @@ int main() {
 //    map.search("aCelb");
 
     PriorityQ q;
-    InitializeMapConsole(ConsoleGames);
-    //InitializeMapApp(AppGames);
+    //InitializeMapConsole(ConsoleGames);
+    InitializeMapApp(AppGames);
 
     q.insert("A");
     q.insert("B");
