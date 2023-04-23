@@ -7,12 +7,13 @@
 #include <unordered_map>
 #include "ConsoleAppsNodes.cpp"
 #include <chrono>
+#include <stdexcept>
 
 using namespace std;
 
 unordered_map<string, sf::Texture> TextureManager::textures;
 
-void InitializeMapConsole(HashTableConsole& catalogue) {
+void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
     auto start_time = chrono::steady_clock::now();
 
     string path = "files/ConsoleStoreGames.csv";
@@ -183,6 +184,8 @@ int main() {
     bool entered = false;
     int maxNumBoxes = 0;
     int numBoxes = 1;
+    bool allowTextInput = true;
+    vector<string> searchParams;
     vector<sf::Text> searchTexts;
 
     while (window.isOpen()){
@@ -197,6 +200,31 @@ int main() {
                 if (respawn.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     //TODO: clear out text boxes, equivalent to start over
                     parametersQ = false;
+                    searchTexts.clear();
+                    for (int i = 0; i < searchParams.size(); i++) {
+                        cout << searchParams.at(i) << endl;
+                        string key = searchParams.at(i);
+                        if (key.find('\r') == 0)
+                            key = key.substr(1);
+                        transform(key.begin(),key.end(), key.begin(),
+                                  [](unsigned char c) { return std::tolower(c); });
+                        try {
+                            auto finder = ConsoleGames.find(key);
+                            if (finder == ConsoleGames.end()) {
+                                throw invalid_argument("We're sorry, \"" + searchParams.at(i) + "\" is not in our library of games.");
+                            }
+                            cout << ConsoleGames[key]->price << endl;
+                        } catch (invalid_argument &e) {
+                            cerr << "WaterVapor Gaming has encountered an error, please standby." <<
+                            endl << e.what() << endl;
+                        }
+                    }
+                    searchParams.clear();
+                    numBoxes = 1;
+                    input.clear();
+                    cursor.setString("|");
+                    cursor.setPosition(525, 200);
+                    allowTextInput = true;
                 }
                 if (coal.getGlobalBounds().contains(coordinates.x, coordinates.y)){ //option 1
                     maxNumBoxes = 1;
@@ -216,7 +244,7 @@ int main() {
                 }
             }
             if (parametersQ) {
-                if (event.type == sf::Event::TextEntered && !entered) {
+                if (event.type == sf::Event::TextEntered && !entered && allowTextInput) {
                     if ((isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
                          || isspace(event.text.unicode)) && input.getSize() < 25) {
                         input += event.text.unicode;
@@ -231,19 +259,23 @@ int main() {
                         input = input.substring(0, input.getSize() - 1);
                         cursor.setString(input + "|");
                     }
-                    if (event.key.code == sf::Keyboard::Enter) {
+                    if (event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes && allowTextInput) {
                         searchParameter1 = input.toAnsiString();
+                        searchParams.push_back(input);
                         numBoxes++;
+                        if (numBoxes > maxNumBoxes)
+                            allowTextInput = false;
                         int increment = (numBoxes - 2) * 50;
                         int x = 200 + increment;
+                        searchParameterDisplay.setPosition(525, x);
                         makeText(searchParameterDisplay, font, searchParameter1, 30, 525, x);
                         //searchParameterDisplay.setStyle(sf::Text::Bold);
                         input.clear();
+                        searchTexts.push_back(searchParameterDisplay);
                         if (!searchParameter1.empty()) {
                             transform(searchParameter1.begin(), searchParameter1.end(), searchParameter1.begin(),
                                       [](unsigned char c) { return std::tolower(c); });
                             cout << searchParameter1 << endl;
-                            cout << searchRes[searchParameter1] << endl;
 
                         }
                     }
@@ -256,7 +288,6 @@ int main() {
         int x = 200;
         if(parametersQ) {
             for (int i = 1; i <= numBoxes; i++) {
-                searchTexts.push_back(searchParameterDisplay);
                 makeInputBox(window, 525, x); // search boxes pop up
                 if (numBoxes <= maxNumBoxes) {
                     window.draw(cursor); //cursor tracts
