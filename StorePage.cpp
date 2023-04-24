@@ -11,9 +11,11 @@
 #include <chrono>
 #include <fstream>
 #include <sstream>
+#include "PriorityQ.h"
+#include <functional>
+#include <any>
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
-    auto start_time = chrono::steady_clock::now();
 
     string path = "files/ConsoleStoreGames.csv";
     ifstream storeFile(path);
@@ -26,15 +28,15 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
             getline(storeFile, headerLine);
 
             string line;
-            while(getline(storeFile, line)) {
+            while (getline(storeFile, line)) {
                 istringstream line_stream(line);
                 string cell;
                 vector<string> nodeProperties;
 
                 while (getline(line_stream, cell, ',')) {
-                    if(cell.empty()) {
-                        nodeProperties.push_back(("N/A"));
-                    }else {
+                    if (cell.empty()) {
+                        nodeProperties.emplace_back(("N/A"));
+                    } else {
                         nodeProperties.push_back(cell);
                     }
                 }
@@ -44,16 +46,10 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
             break;
         }
     }
-
-    cout << endl;
-    auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
 }
 
 //TODO: Implement the App hash table
 static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
-    auto start_time = chrono::steady_clock::now();
 
     string path = "files/AppStoreGames.csv";
     ifstream storeFile(path);
@@ -73,7 +69,7 @@ static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        nodeProperties.push_back(("N/A"));
+                        nodeProperties.emplace_back(("N/A"));
                     }else {
                         nodeProperties.push_back(cell);
                     }
@@ -86,20 +82,16 @@ static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
             break;
         }
     }
-
-    cout << endl;
-    auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
-static void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int height){
+static void makeText(sf::Text& text, sf::Font& font, const string& s, int size, int width, int height){
     text.setFont(font);
     text.setCharacterSize(size);
     text.setFillColor(sf::Color::Black);
     text.setString(s);
     text.setPosition(width, height);
 }
+
 static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int width, int height){ // initial 300, 40 ; 525, 200
     sf::RectangleShape inputBox(sf::Vector2f(sizeX, sizeY));
     inputBox.setPosition(width, height);
@@ -110,11 +102,43 @@ static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int wid
 }
 
 static void makeGUI() {
-    unordered_map < string, ConsoleNode * > ConsoleGames;
-    unordered_map < string, AppNode * > AppGames;
+    unordered_map <string, ConsoleNode*> ConsoleGames;
+    unordered_map <string, AppNode*> AppGames;
+    PriorityQ q1;
+    PriorityQ q2;
+    PriorityQ q3;
+    PriorityQ q4;
+    unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
+            {"title", [](const ConsoleNode& node) -> string { return node.Title; }},
+            {"players", [](const ConsoleNode& node) -> int { return node.players; }},
+            {"online", [](const ConsoleNode& node) -> bool { return node.online; }},
+            {"genres", [](const ConsoleNode& node) -> vector<string> { return node.genres; }},
+            {"price", [](const ConsoleNode& node) -> float { return node.price; }},
+            {"console", [](const ConsoleNode& node) -> vector<string> { return node.console; }},
+            {"rating", [](const ConsoleNode& node) -> string { return node.rating; }},
+            {"release", [](const ConsoleNode& node) -> float { return node.release; }},
+    };
+    unordered_map<std::string, std::function<std::any(const AppNode&)>> appTraits = {
+            {"title", [](const AppNode& node) -> std::any { return node.Title; }},
+            {"rating", [](const AppNode& node) -> float { return node.rating; }},
+            {"ratingCount", [](const AppNode& node) -> int { return node.ratingCount; }},
+            {"price", [](const AppNode& node) -> float { return node.price; }},
+            {"inAppPurchases", [](const AppNode& node) -> std::any { return node.inAppPurchases; }},
+            {"developer", [](const AppNode& node) -> std::any { return node.developer; }},
+            {"age", [](const AppNode& node) -> std::any { return node.age; }},
+            {"languages", [](const AppNode& node) -> std::any { return node.languages; }},
+            {"size", [](const AppNode& node) -> std::any { return node.size; }},
+            {"genres", [](const AppNode& node) -> std::any { return node.genres; }},
+            {"releaseDate", [](const AppNode& node) -> std::any { return node.releaseDate; }},
+            {"updateData", [](const AppNode& node) -> std::any { return node.updateData; }},
+    };
 
+    auto start_time = chrono::steady_clock::now();
+    InitializeMapApp(AppGames);
     InitializeMapConsole(ConsoleGames);
-
+    auto end_time = chrono::steady_clock::now();
+    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
     int width = 1500;
     int height = 850;
 
