@@ -205,25 +205,35 @@ static void makeGUI() {
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
-//                    for (int i = 0; i < searchParams.size(); i++) {
-//                        cout << searchParams.at(i) << endl;
-//                        string key = searchParams.at(i);
-//                        if (key.find('\r') == 0)
-//                            key = key.substr(1);
-//                        transform(key.begin(), key.end(), key.begin(),
-//                                  [](unsigned char c) { return std::tolower(c); });
-//                        try {
-//                            auto finder = ConsoleGames.find(key);
-//                            if (finder == ConsoleGames.end()) {
-//                                throw invalid_argument(
-//                                        "We're sorry, \"" + searchParams.at(i) + "\" is not in our library of games.");
-//                            }
-//                            cout << ConsoleGames[key]->price << endl;
-//                        } catch (invalid_argument &e) {
-//                            cerr << "WaterVapor Gaming has encountered an error, please standby." <<
-//                                 endl << e.what() << endl;
-//                        }
-//                    }
+                                        for (int j = 0; j < searchParams.size(); j++) {
+                        auto iter = ConsoleGames.begin();
+                        string param = searchParams.at(j);
+                        transform(param.begin(), param.end(), param.begin(),
+                                  [](unsigned char c) { return std::tolower(c); });
+                        //TODO: Have input handling for all possible search parameters
+                        if (param == "price" || param == "release") {
+                            while (iter != ConsoleGames.end()) {
+                                float gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
+                                float queueVal = abs(value.at(j) - gameTraitValue);
+                                if (j == 0)
+                                    q1.insert(to_string(queueVal), iter->second->Title);
+                                else if (j == 1)
+                                    q2.insert(to_string(queueVal), iter->second->Title);
+                                else if (j == 2)
+                                    q3.insert(to_string(queueVal), iter->second->Title);
+                                else
+                                    q4.insert(to_string(queueVal), iter->second->Title);
+                                iter++;
+                            }
+                            for (int i = 0; i < 100; i++) {
+                                string key = q1.extractedVal();
+                                transform(key.begin(), key.end(), key.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
+                            }
+                        }
+                        cout << "Here is 100 games that fit your preferences of " << searchParams.at(j) << "\n";
+                    }
                     givenVals.clear();
                     searchParams.clear();
                     numBoxes = 1;
