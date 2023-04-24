@@ -11,9 +11,11 @@
 #include <chrono>
 #include <fstream>
 #include <sstream>
+#include "PriorityQ.h"
+#include <functional>
+#include <any>
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
-    auto start_time = chrono::steady_clock::now();
 
     string path = "files/ConsoleStoreGames.csv";
     ifstream storeFile(path);
@@ -26,15 +28,15 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
             getline(storeFile, headerLine);
 
             string line;
-            while(getline(storeFile, line)) {
+            while (getline(storeFile, line)) {
                 istringstream line_stream(line);
                 string cell;
                 vector<string> nodeProperties;
 
                 while (getline(line_stream, cell, ',')) {
-                    if(cell.empty()) {
-                        nodeProperties.push_back(("N/A"));
-                    }else {
+                    if (cell.empty()) {
+                        nodeProperties.emplace_back(("N/A"));
+                    } else {
                         nodeProperties.push_back(cell);
                     }
                 }
@@ -44,16 +46,10 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
             break;
         }
     }
-
-    cout << endl;
-    auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::seconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " sec.\n";
 }
 
 //TODO: Implement the App hash table
 static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
-    auto start_time = chrono::steady_clock::now();
 
     string path = "files/AppStoreGames.csv";
     ifstream storeFile(path);
@@ -73,7 +69,7 @@ static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
 
                 while (getline(line_stream, cell, ',')) {
                     if(cell.empty()) {
-                        nodeProperties.push_back(("N/A"));
+                        nodeProperties.emplace_back(("N/A"));
                     }else {
                         nodeProperties.push_back(cell);
                     }
@@ -86,20 +82,16 @@ static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
             break;
         }
     }
-
-    cout << endl;
-    auto end_time = chrono::steady_clock::now();
-    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
-    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 }
 
-static void makeText(sf::Text& text, sf::Font& font, string s, int size, int width, int height){
+static void makeText(sf::Text& text, sf::Font& font, const string& s, int size, int width, int height){
     text.setFont(font);
     text.setCharacterSize(size);
     text.setFillColor(sf::Color::Black);
     text.setString(s);
     text.setPosition(width, height);
 }
+
 static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int width, int height){ // initial 300, 40 ; 525, 200
     sf::RectangleShape inputBox(sf::Vector2f(sizeX, sizeY));
     inputBox.setPosition(width, height);
@@ -110,10 +102,43 @@ static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int wid
 }
 
 static void makeGUI() {
-    unordered_map < string, ConsoleNode * > ConsoleGames;
-    unordered_map < string, AppNode * > AppGames;
+    unordered_map <string, ConsoleNode*> ConsoleGames;
+    unordered_map <string, AppNode*> AppGames;
+    PriorityQ q1;
+    PriorityQ q2;
+    PriorityQ q3;
+    PriorityQ q4;
+    unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
+            {"title", [](const ConsoleNode& node) -> string { return node.Title; }},
+            {"players", [](const ConsoleNode& node) -> int { return node.players; }},
+            {"online", [](const ConsoleNode& node) -> bool { return node.online; }},
+            {"genres", [](const ConsoleNode& node) -> vector<string> { return node.genres; }},
+            {"price", [](const ConsoleNode& node) -> float { return node.price; }},
+            {"console", [](const ConsoleNode& node) -> vector<string> { return node.console; }},
+            {"rating", [](const ConsoleNode& node) -> string { return node.rating; }},
+            {"release", [](const ConsoleNode& node) -> float { return node.release; }},
+    };
+    unordered_map<std::string, std::function<std::any(const AppNode&)>> appTraits = {
+            {"title", [](const AppNode& node) -> std::any { return node.Title; }},
+            {"rating", [](const AppNode& node) -> float { return node.rating; }},
+            {"ratingCount", [](const AppNode& node) -> int { return node.ratingCount; }},
+            {"price", [](const AppNode& node) -> float { return node.price; }},
+            {"inAppPurchases", [](const AppNode& node) -> std::any { return node.inAppPurchases; }},
+            {"developer", [](const AppNode& node) -> std::any { return node.developer; }},
+            {"age", [](const AppNode& node) -> std::any { return node.age; }},
+            {"languages", [](const AppNode& node) -> std::any { return node.languages; }},
+            {"size", [](const AppNode& node) -> std::any { return node.size; }},
+            {"genres", [](const AppNode& node) -> std::any { return node.genres; }},
+            {"releaseDate", [](const AppNode& node) -> std::any { return node.releaseDate; }},
+            {"updateData", [](const AppNode& node) -> std::any { return node.updateData; }},
+    };
 
+    auto start_time = chrono::steady_clock::now();
+    InitializeMapApp(AppGames);
     InitializeMapConsole(ConsoleGames);
+    auto end_time = chrono::steady_clock::now();
+    auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+    cout << "Elapsed time: " << elapsed_time.count() << " ms.\n";
 
     int width = 1500;
     int height = 850;
@@ -133,7 +158,7 @@ static void makeGUI() {
     sf::Text initialQ;
     makeText(initialQ, font, "How many parameters would you like to search by?", 35, 325, 200);
     sf::Text sByTitle;
-    makeText(sByTitle, font, "Enter Title here: ", 35, 50, 220);
+    makeText(sByTitle, font, "Enter Title here: ", 35, 0, 0);
 
     int numHeight = 240;
     vector <sf::Text> initialNumbers;
@@ -157,25 +182,64 @@ static void makeGUI() {
     diamond.setScale(0.20f, 0.20f);
     sf::Sprite respawn = sf::Sprite(TextureManager::GetTexture("respawn"));
     respawn.setScale(0.4f, 0.5f);
+    respawn.setPosition(width - 270, 0);
     bool parametersQ = false;
+
+    sf::Sprite console = sf::Sprite(TextureManager::GetTexture("console"));
+    console.setScale(0.5f, 0.5f);
+    console.setPosition(400, 310);
+    sf::Sprite nokia = sf::Sprite(TextureManager::GetTexture("phone"));
+    nokia.setScale(0.5f, 0.5f);
+    nokia.setPosition(850, 310);
+    bool typeConsole = false;
+    bool typeChosen = false;
+    sf::Text initialQ2;
+    makeText(initialQ2, font, "What type of game are you searching?", 35, 325, 200);
 
     sf::Text searchParameterDisplay;
     string searchParameter1;
     sf::Text valueToSearchDisplay;
     string valueToSearch;
 
+    sf::View view(sf::FloatRect(0,0,width,height));
+
     sf::RectangleShape titleBox(sf::Vector2f(300, 60));
-    titleBox.setPosition(50, 273);
+    titleBox.setPosition(10, 53);
     titleBox.setFillColor(sf::Color::White);
     titleBox.setOutlineThickness(2);
     titleBox.setOutlineColor(sf::Color::Black);
     bool isEditing = false;
+    sf::Text titleSearchDisplay;
+    sf::Text titleSearchDisplay2;
     string titleSearch;
+    string titleSearch2;
     sf::Sprite star;
     star = sf::Sprite(TextureManager::GetTexture("star"));
-    star.setPosition(370, 276);
+    star.setPosition(323, 53);
     star.setScale(0.25, 0.25);
     bool displayStar = false;
+    bool selecting = true;
+
+    sf::Sprite pacman;
+    pacman = sf::Sprite(TextureManager::GetTexture("pacman"));
+    pacman.setPosition(650, 0);
+    pacman.setScale(0.45f, 0.45f);
+    sf::Sprite shield;
+    shield = sf::Sprite(TextureManager::GetTexture("shield"));
+    shield.setPosition(550, 0);
+    shield.setScale(0.45f, 0.45f);
+    sf::Sprite pokeball;
+    pokeball = sf::Sprite(TextureManager::GetTexture("pokeball"));
+    pokeball.setPosition(750, 0);
+    pokeball.setScale(0.45f, 0.45f);
+    bool pokeballClicked = false;
+    bool shieldClicked = false;
+    bool pacmanClicked = false;
+
+    sf::Sprite bowser;
+    bowser = sf::Sprite(TextureManager::GetTexture("bowser"));
+    bowser.setPosition(50, 75);
+    bowser.setScale(3.5f, 4.0f);
 
     sf::Sprite chief;
     chief = sf::Sprite(TextureManager::GetTexture("chief"));
@@ -191,11 +255,27 @@ static void makeGUI() {
     vector <sf::Text> searchVals;
     bool parameterGiven = false;
 
+    const auto topPage = (float) height;
+
     while (window.isOpen()) {
         sf::Event event{};
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+            // Check for mouse wheel movement
+            if (event.type == sf::Event::MouseWheelMoved) {
+                // Check the movement direction
+                if (event.mouseWheel.delta > 0) {
+                    sf::Vector2f viewPos = view.getCenter();
+                    view.move(0, -50);
+                    if (view.getCenter().y - view.getSize().y / 2 < 0){
+                        view.setCenter(viewPos.x, view.getSize().y / 2);
+                    }
+                }
+                else if (event.mouseWheel.delta < 0) {
+                    view.move(0, 50);
+                }
             }
             if (event.type == sf::Event::MouseButtonPressed) {
                 sf::Vector2i coordinates = sf::Mouse::getPosition(window);
@@ -205,59 +285,103 @@ static void makeGUI() {
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
-//                    for (int i = 0; i < searchParams.size(); i++) {
-//                        cout << searchParams.at(i) << endl;
-//                        string key = searchParams.at(i);
-//                        if (key.find('\r') == 0)
-//                            key = key.substr(1);
-//                        transform(key.begin(), key.end(), key.begin(),
-//                                  [](unsigned char c) { return std::tolower(c); });
-//                        try {
-//                            auto finder = ConsoleGames.find(key);
-//                            if (finder == ConsoleGames.end()) {
-//                                throw invalid_argument(
-//                                        "We're sorry, \"" + searchParams.at(i) + "\" is not in our library of games.");
-//                            }
-//                            cout << ConsoleGames[key]->price << endl;
-//                        } catch (invalid_argument &e) {
-//                            cerr << "WaterVapor Gaming has encountered an error, please standby." <<
-//                                 endl << e.what() << endl;
-//                        }
-//                    }
+                    for (int j = 0; j < searchParams.size(); j++) {
+                        auto iter = ConsoleGames.begin();
+                        string param = searchParams.at(j);
+                        transform(param.begin(), param.end(), param.begin(),
+                                  [](unsigned char c) { return std::tolower(c); });
+                        //TODO: Have input handling for all possible search parameters
+                        if (param == "price" || param == "release") {
+                            while (iter != ConsoleGames.end()) {
+                                float gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
+                                float queueVal = abs(stof(givenVals.at(j)) - gameTraitValue);
+                                if (j == 0)
+                                    q1.insert(to_string(queueVal), iter->second->Title);
+                                else if (j == 1)
+                                    q2.insert(to_string(queueVal), iter->second->Title);
+                                else if (j == 2)
+                                    q3.insert(to_string(queueVal), iter->second->Title);
+                                else
+                                    q4.insert(to_string(queueVal), iter->second->Title);
+                                iter++;
+                            }
+                            for (int i = 0; i < 100; i++) {
+                                string key = q1.extractedVal();
+                                transform(key.begin(), key.end(), key.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
+                            }
+                        }
+                        cout << "Here is 100 games that fit your preferences of " << searchParams.at(j) << "\n";
+                    }
                     givenVals.clear();
                     searchParams.clear();
                     numBoxes = 1;
                     valBoxes = 1;
                     input.clear();
                     cursor.setString("");
-                    cursor.setPosition(525, 200);
+                    cursor.setPosition(0, 0);
                     cursor2.setString("");
                     cursor2.setPosition(0,0);
                     allowTextInput = true;
                     displayStar = false;
+                    selecting = true;
+                    typeChosen = false;
+                    typeConsole = false;
+                    pacmanClicked = false;
+                    shieldClicked = false;
+                    pokeballClicked = false;
+                }
+                //TODO: implement button functionality
+                if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    pacmanClicked = true;
+                }
+                if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    pokeballClicked = true;
+                }
+                if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    shieldClicked = true;
+                }
+                if (console.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    typeConsole = true;
+                    typeChosen = true;
+                }
+                if (nokia.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    typeChosen = true;
+                    typeConsole = false;
+                }
+                if (displayStar && (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y) ||
+                    star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
+                    displayStar = false;
                 }
                 if (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     isEditing = true;
+                    cursor.setString("");
+                    cursor2.setString("");
                 }
-                if (coal.getGlobalBounds().contains(coordinates.x, coordinates.y)) { //option 1
+                if (coal.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 1
                     maxNumBoxes = 1;
                     parametersQ = true;
                     isEditing = false;
+                    selecting = false;
                 }
-                if (iron.getGlobalBounds().contains(coordinates.x, coordinates.y)) { // option 2
+                if (iron.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { // option 2
                     maxNumBoxes = 2;
                     parametersQ = true;
                     isEditing = false;
+                    selecting = false;
                 }
-                if (gold.getGlobalBounds().contains(coordinates.x, coordinates.y)) { //option 3
+                if (gold.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 3
                     maxNumBoxes = 3;
                     parametersQ = true;
                     isEditing = false;
+                    selecting = false;
                 }
-                if (diamond.getGlobalBounds().contains(coordinates.x, coordinates.y)) { //option 4
+                if (diamond.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 4
                     maxNumBoxes = 4;
                     parametersQ = true;
                     isEditing = false;
+                    selecting = false;
                 }
             }
             if (parametersQ || isEditing) {
@@ -288,13 +412,13 @@ static void makeGUI() {
                         input += event.text.unicode;
                         if (input.getSize() <= 25) {
                             cursor.setString(input + "|");
-                            cursor.setPosition(50, 273);
+                            cursor.setPosition(10, 53);
                             if (input.getSize() == 25){
                                 cursor.setString(input);
                             }
                         } else if (input.getSize() < 50){
                             cursor2.setString(input.substring(25) + "|");
-                            cursor2.setPosition(50, 293);
+                            cursor2.setPosition(10, 73);
                         }
                     }
                 } if (event.type == sf::Event::KeyPressed) {
@@ -355,7 +479,13 @@ static void makeGUI() {
                         }
                     }
                     if (isEditing && event.key.code == sf::Keyboard::Enter && allowTextInput) {
-                        titleSearch = input.toAnsiString();
+                        titleSearch = input.substring(0, 20).toAnsiString();
+                        makeText(titleSearchDisplay, font, titleSearch, 23, 10, 53);
+                        if (input.toAnsiString().length() > 20) {
+                            titleSearch2 = input.substring(20).toAnsiString();
+                            makeText(titleSearchDisplay2, font, titleSearch2, 23, 10, 83);
+                        }
+                        input.clear();
                         if (!titleSearch.empty()){
                             transform(titleSearch.begin(), titleSearch.end(), titleSearch.begin(),
                                       [](unsigned char c) { return std::tolower(c); });
@@ -371,64 +501,81 @@ static void makeGUI() {
         }
         // order should be clear, draw display.
         window.clear(sf::Color::Blue);
+        window.setView(view);
         window.draw(waterVaporText);
+        window.draw(pacman);
+        window.draw(shield);
+        window.draw(pokeball);
 
         //search by title
         window.draw(sByTitle);
         window.draw(titleBox);
-        if(isEditing && !parametersQ){
+        if(isEditing && !parametersQ && !pacmanClicked && !shieldClicked && !pokeballClicked){
             window.draw(cursor);
             window.draw(cursor2);
         }
         if (displayStar){
+            window.draw(titleSearchDisplay);
+            window.draw(titleSearchDisplay2);
             window.draw(star);
         }
 
-        int y = 200;
-        if (parametersQ) {
-            // if (parameterGiven){
-            for (int i = 1; i <= valBoxes; i++) {
-                makeInputBox(window, 200, 40, 845, y); // search boxes pop up
-                if (valBoxes <= maxNumBoxes) {
-                    window.draw(cursor); //cursor tracts
+        if (typeChosen && !pacmanClicked && !shieldClicked && !pokeballClicked) {
+            if (parametersQ) {
+                // if (parameterGiven){
+                int y = 200;
+                for (int i = 1; i <= valBoxes; i++) {
+                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
+                    if (valBoxes <= maxNumBoxes) {
+                        window.draw(cursor); //cursor tracts
+                    }
+                    y += 50;
+                    if (i == maxNumBoxes) {
+                        break;
+                    }
                 }
-                y += 50;
-                if (i == maxNumBoxes) {
-                    break;
+                for (auto &iter: searchVals) { // search text display
+                    window.draw(iter);
                 }
-            }
-            for (auto &iter: searchVals) { // search text display
-                window.draw(iter);
-            }
-            //} else {
-            y = 200;
-            for (int i = 1; i <= numBoxes; i++) {
-                makeInputBox(window, 300, 40, 525, y); // search boxes pop up
-                if (numBoxes <= maxNumBoxes) {
-                    window.draw(cursor); //cursor tracts
+                //} else {
+                y = 200;
+                for (int i = 1; i <= numBoxes; i++) {
+                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
+                    if (numBoxes <= maxNumBoxes) {
+                        window.draw(cursor); //cursor tracts
+                    }
+                    y += 50;
+                    if (i == maxNumBoxes) {
+                        break;
+                    }
                 }
-                y += 50;
-                if (i == maxNumBoxes) {
-                    break;
+                for (auto &iter: searchTexts) { // search text display
+                    window.draw(iter);
                 }
+                //}
+            } else {
+                searchTexts.clear();
+                window.draw(initialQ);
+                for (const auto &number: initialNumbers) {
+                    window.draw(number);
+                }
+                window.draw(coal);
+                window.draw(gold);
+                window.draw(iron);
+                window.draw(diamond);
             }
-            for (auto &iter: searchTexts) { // search text display
-                window.draw(iter);
-            }
-            //}
-        } else {
-            searchTexts.clear();
-            window.draw(initialQ);
-            for (const auto &number: initialNumbers) {
-                window.draw(number);
-            }
-            window.draw(coal);
-            window.draw(gold);
-            window.draw(iron);
-            window.draw(diamond);
+        } else if (!pacmanClicked && !shieldClicked && !pokeballClicked){
+            window.draw(initialQ2);
+            window.draw(nokia);
+            window.draw(console);
         }
         window.draw(chief);
         window.draw(respawn);
+
+        //new window display
+        if (pacmanClicked || pokeballClicked || shieldClicked){
+            window.draw(bowser);
+        }
 
         window.display();
     }
