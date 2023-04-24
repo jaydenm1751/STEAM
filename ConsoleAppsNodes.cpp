@@ -27,16 +27,16 @@ struct AppNode {
 
 struct ConsoleNode {
     string Title;
-    int players{};
-    bool online{};
-    vector<string> genres;
+    int players{}; //search if it is single player or coop (1 or more than 1)
+    bool online{}; //search
+    vector<string> genres; //search
     string publishers;
     int review{};
     float sales{};
-    float price{};
-    vector<string> console;
-    string rating;
-    int release{};
+    float price{}; //search
+    vector<string> console; //search
+    string rating; //search
+    float release{}; //search
     float allPlayStyle{};
     vector<float> completionists;
     vector<float> storyDLC;
@@ -49,7 +49,7 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
         int index = 7;
         transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
         catalogue.insert(make_pair(key, new AppNode));
-        cout << catalogue.size() << "\t" << data.at(2) << "\t\t\t" << data.at(4) << "\t" << data.at(6) << endl;
+        //cout << catalogue.size() << "\t" << data.at(2) << "\t\t\t" << data.at(4) << "\t" << data.at(6) << endl;
         catalogue[key]->url = data.at(0);
         catalogue[key]->ID = stoi(data.at(1));
         catalogue[key]->Title = data.at(2);
@@ -88,7 +88,6 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
         index++;
         catalogue[key]->age = data.at(index);
         index++;
-//        vectorParsingAppsString(index, data, catalogue, key);
         if (data.at(index) == "N/A") {
             catalogue[key]->languages.emplace_back("Unavailable");
             index++;
@@ -110,7 +109,6 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
                 index++;
             }
         }
-        cout << data.at(index) << "\n";
         catalogue[key]->size = stoull(data.at(index));
         index++;
         if (data.at(index) == "N/A") {
@@ -143,7 +141,7 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
     if (catalogue.count(key) == 0) {
         catalogue.insert(make_pair(key, new ConsoleNode));
         catalogue[key]->Title = data.at(0);
-        cout << catalogue.size() << "\t" << data.at(0) << "\t\t\t" << data.at(1) << "\t" << data.at(8) << endl;
+        //cout << catalogue.size() << "\t" << data.at(0) << "\t\t\t" << data.at(1) << "\t" << data.at(8) << endl;
         catalogue[key]->players = stoi(data.at(1));
         catalogue[key]->online = (data.at(2) == "TRUE");
         if (data.at(index).find("\"") == 0) {
