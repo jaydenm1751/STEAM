@@ -204,6 +204,7 @@ static void makeGUI() {
                     //TODO: clear out text boxes, equivalent to start over
                     parametersQ = false;
                     searchTexts.clear();
+                    searchVals.clear();
                     for (int i = 0; i < searchParams.size(); i++) {
                         cout << searchParams.at(i) << endl;
                         string key = searchParams.at(i);
@@ -223,8 +224,10 @@ static void makeGUI() {
                                  endl << e.what() << endl;
                         }
                     }
+                    givenVals.clear();
                     searchParams.clear();
                     numBoxes = 1;
+                    valBoxes = 1;
                     input.clear();
                     cursor.setString("");
                     cursor.setPosition(525, 200);
@@ -275,6 +278,9 @@ static void makeGUI() {
                             cursor.setPosition(845, x);
                         }
                     }
+                    if (valBoxes > maxNumBoxes) {
+                        allowTextInput = false;
+                    }
 
                 } if (isEditing && event.type == sf::Event::TextEntered) {
                     if ((isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
@@ -308,10 +314,13 @@ static void makeGUI() {
                             cursor.setString(input + "|");
                         }
                     }
-                    if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes && allowTextInput) {
+                    if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes + 1 && allowTextInput) {
                         if (!parameterGiven) {
                             searchParameter1 = input.toAnsiString();
                             searchParams.push_back(searchParameter1);
+                            if (numBoxes > maxNumBoxes) {
+                                allowTextInput = false;
+                            }
                             numBoxes++;
                             parameterGiven = true;
                             int increment = (numBoxes - 2) * 50;
@@ -338,7 +347,7 @@ static void makeGUI() {
                             int x = 200 + increment;
                             makeText(valueToSearchDisplay, font, valueToSearch, 25, 845, x);
                             searchVals.push_back(valueToSearchDisplay);
-                            if (!searchParameter1.empty()) {
+                            if (!valueToSearch.empty()) {
                                 transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
                                           [](unsigned char c) { return std::tolower(c); });
                                 cout << valueToSearch << endl;
@@ -375,7 +384,6 @@ static void makeGUI() {
             window.draw(star);
         }
 
-        int x = 525;
         int y = 200;
         if (parametersQ) {
            // if (parameterGiven){
