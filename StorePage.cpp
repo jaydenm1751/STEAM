@@ -204,40 +204,9 @@ static void makeGUI() {
                     //TODO: clear out text boxes, equivalent to start over
                     parametersQ = false;
                     searchTexts.clear();
-                    vector <float> value = {
-                            24.95,
-                            2004
-                    };
-                    for (int j = 0; j < searchParams.size(); j++) {
-                        auto iter = ConsoleGames.begin();
-                        string param = searchParams.at(j);
-                        transform(param.begin(), param.end(), param.begin(),
-                                  [](unsigned char c) { return std::tolower(c); });
-                        //TODO: Have input handling for all possible search parameters
-                        if (param == "price" || param == "release") {
-                            while (iter != ConsoleGames.end()) {
-                                float gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
-                                float queueVal = abs(value.at(j) - gameTraitValue);
-                                if (j == 0)
-                                    q1.insert(to_string(queueVal), iter->second->Title);
-                                else if (j == 1)
-                                    q2.insert(to_string(queueVal), iter->second->Title);
-                                else if (j == 2)
-                                    q3.insert(to_string(queueVal), iter->second->Title);
-                                else
-                                    q4.insert(to_string(queueVal), iter->second->Title);
-                                iter++;
-                            }
-//                            for (int i = 0; i < 100; i++) {
-//                                string key = q.extractedVal();
-//                                transform(key.begin(), key.end(), key.begin(),
-//                                          [](unsigned char c) { return std::tolower(c); });
-//                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
-//                            }
-                        }
-                        cout << "Here is 100 games that fit your preferences of " << searchParams.at(j) << "\n";
-                    }
+                    searchVals.clear();
 //                    for (int i = 0; i < searchParams.size(); i++) {
+//                        cout << searchParams.at(i) << endl;
 //                        string key = searchParams.at(i);
 //                        if (key.find('\r') == 0)
 //                            key = key.substr(1);
@@ -415,38 +384,37 @@ static void makeGUI() {
             window.draw(star);
         }
 
-        int x = 525;
         int y = 200;
         if (parametersQ) {
-           // if (parameterGiven){
-                for (int i = 1; i <= valBoxes; i++) {
-                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
-                    if (valBoxes <= maxNumBoxes) {
-                        window.draw(cursor); //cursor tracts
-                    }
-                    y += 50;
-                    if (i == maxNumBoxes) {
-                        break;
-                    }
+            // if (parameterGiven){
+            for (int i = 1; i <= valBoxes; i++) {
+                makeInputBox(window, 200, 40, 845, y); // search boxes pop up
+                if (valBoxes <= maxNumBoxes) {
+                    window.draw(cursor); //cursor tracts
                 }
-                for (auto &iter: searchVals) { // search text display
-                    window.draw(iter);
+                y += 50;
+                if (i == maxNumBoxes) {
+                    break;
                 }
+            }
+            for (auto &iter: searchVals) { // search text display
+                window.draw(iter);
+            }
             //} else {
-                y = 200;
-                for (int i = 1; i <= numBoxes; i++) {
-                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
-                    if (numBoxes <= maxNumBoxes) {
-                        window.draw(cursor); //cursor tracts
-                    }
-                    y += 50;
-                    if (i == maxNumBoxes) {
-                        break;
-                    }
+            y = 200;
+            for (int i = 1; i <= numBoxes; i++) {
+                makeInputBox(window, 300, 40, 525, y); // search boxes pop up
+                if (numBoxes <= maxNumBoxes) {
+                    window.draw(cursor); //cursor tracts
                 }
-                for (auto &iter: searchTexts) { // search text display
-                    window.draw(iter);
+                y += 50;
+                if (i == maxNumBoxes) {
+                    break;
                 }
+            }
+            for (auto &iter: searchTexts) { // search text display
+                window.draw(iter);
+            }
             //}
         } else {
             searchTexts.clear();
