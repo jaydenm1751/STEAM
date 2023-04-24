@@ -100,9 +100,9 @@ static void makeText(sf::Text& text, sf::Font& font, string s, int size, int wid
     text.setString(s);
     text.setPosition(width, height);
 }
-static void makeInputBox(sf::RenderWindow& window, int x, int y){ // initial 525, 200
-    sf::RectangleShape inputBox(sf::Vector2f(300, 40));
-    inputBox.setPosition(x, y);
+static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int width, int height){ // initial 300, 40 ; 525, 200
+    sf::RectangleShape inputBox(sf::Vector2f(sizeX, sizeY));
+    inputBox.setPosition(width, height);
     inputBox.setFillColor(sf::Color::White);
     inputBox.setOutlineThickness(2);
     inputBox.setOutlineColor(sf::Color::Black);
@@ -161,6 +161,8 @@ static void makeGUI() {
 
     sf::Text searchParameterDisplay;
     string searchParameter1;
+    sf::Text valueToSearchDisplay;
+    string valueToSearch;
 
     sf::RectangleShape titleBox(sf::Vector2f(300, 60));
     titleBox.setPosition(50, 273);
@@ -179,12 +181,15 @@ static void makeGUI() {
     chief = sf::Sprite(TextureManager::GetTexture("chief"));
     chief.setPosition((height / 2), height / 2 + 100);
     chief.setScale(0.5f, 0.5f);
-    bool entered = false;
     int maxNumBoxes = 0;
+    int valBoxes = 1;
     int numBoxes = 1;
     bool allowTextInput = true;
     vector <string> searchParams;
+    vector <string> givenVals;
     vector <sf::Text> searchTexts;
+    vector <sf::Text> searchVals;
+    bool parameterGiven = false;
 
     while (window.isOpen()) {
         sf::Event event{};
@@ -253,14 +258,22 @@ static void makeGUI() {
                 }
             }
             if (parametersQ || isEditing) {
-                if (event.type == sf::Event::TextEntered && !entered && allowTextInput && !isEditing) {
+                if (event.type == sf::Event::TextEntered && allowTextInput && !isEditing) {
                     if ((isalpha(event.text.unicode) || isdigit(event.text.unicode) || ispunct(event.text.unicode)
                          || isspace(event.text.unicode)) && input.getSize() < 25) {
-                        input += event.text.unicode;
-                        cursor.setString(input + "|");
-                        int increment = (numBoxes - 1) * 50;
-                        int x = 200 + increment;
-                        cursor.setPosition(525, x);
+                        if (!parameterGiven) {
+                            input += event.text.unicode;
+                            cursor.setString(input + "|");
+                            int increment = (numBoxes - 1) * 50;
+                            int x = 200 + increment;
+                            cursor.setPosition(525, x);
+                        } else {
+                            input += event.text.unicode;
+                            cursor.setString(input + "|");
+                            int increment = (numBoxes - 2) * 50;
+                            int x = 200 + increment;
+                            cursor.setPosition(845, x);
+                        }
                     }
 
                 } if (isEditing && event.type == sf::Event::TextEntered) {
@@ -274,13 +287,10 @@ static void makeGUI() {
                                 cursor.setString(input);
                             }
                         } else if (input.getSize() < 50){
-//                            cursor.setString(input);
-//                            cursor.setPosition(50, 273);
                             cursor2.setString(input.substring(25) + "|");
                             cursor2.setPosition(50, 293);
                         }
                     }
-
                 } if (event.type == sf::Event::KeyPressed) {
                     if (!isEditing && event.key.code == sf::Keyboard::BackSpace) {
                         input = input.substring(0, input.getSize() - 1);
@@ -299,26 +309,42 @@ static void makeGUI() {
                         }
                     }
                     if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes && allowTextInput) {
-                        searchParameter1 = input.toAnsiString();
-                        searchParams.push_back(input);
-                        numBoxes++;
-                        if (numBoxes > maxNumBoxes)
-                            allowTextInput = false;
-                        int increment = (numBoxes - 2) * 50;
-                        int x = 200 + increment;
-                        searchParameterDisplay.setPosition(525, x);
-                        makeText(searchParameterDisplay, font, searchParameter1, 30, 525, x);
-                        //searchParameterDisplay.setStyle(sf::Text::Bold);
-                        input.clear();
-                        searchTexts.push_back(searchParameterDisplay);
-                        if (!searchParameter1.empty()) {
-                            transform(searchParameter1.begin(), searchParameter1.end(), searchParameter1.begin(),
-                                      [](unsigned char c) { return std::tolower(c); });
-                            cout << searchParameter1 << endl;
+                        if (!parameterGiven) {
+                            searchParameter1 = input.toAnsiString();
+                            searchParams.push_back(searchParameter1);
+                            numBoxes++;
+                            parameterGiven = true;
+                            int increment = (numBoxes - 2) * 50;
+                            int x = 200 + increment;
+                            makeText(searchParameterDisplay, font, searchParameter1, 30, 525, x);
+                            //searchParameterDisplay.setStyle(sf::Text::Bold);
+                            input.clear();
+                            searchTexts.push_back(searchParameterDisplay);
+                            if (!searchParameter1.empty()) {
+                                transform(searchParameter1.begin(), searchParameter1.end(), searchParameter1.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << searchParameter1 << endl;
+                            }
+                        } else {
+                            valueToSearch = input.toAnsiString();
+                            givenVals.push_back(valueToSearch);
+                            if (valBoxes > maxNumBoxes) {
+                                allowTextInput = false;
+                            }
+                            valBoxes++;
+                            parameterGiven = false;
+                            input.clear();
+                            int increment = (numBoxes - 2) * 50;
+                            int x = 200 + increment;
+                            makeText(valueToSearchDisplay, font, valueToSearch, 25, 845, x);
+                            searchVals.push_back(valueToSearchDisplay);
+                            if (!searchParameter1.empty()) {
+                                transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << valueToSearch << endl;
+                            }
                         }
                     }
-
-                    //TODO: should i make the text giant and bolded like the other things or naw
                     if (isEditing && event.key.code == sf::Keyboard::Enter && allowTextInput) {
                         titleSearch = input.toAnsiString();
                         if (!titleSearch.empty()){
@@ -349,21 +375,39 @@ static void makeGUI() {
             window.draw(star);
         }
 
-        int x = 200;
+        int x = 525;
+        int y = 200;
         if (parametersQ) {
-            for (int i = 1; i <= numBoxes; i++) {
-                makeInputBox(window, 525, x); // search boxes pop up
-                if (numBoxes <= maxNumBoxes) {
-                    window.draw(cursor); //cursor tracts
+           // if (parameterGiven){
+                for (int i = 1; i <= valBoxes; i++) {
+                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
+                    if (valBoxes <= maxNumBoxes) {
+                        window.draw(cursor); //cursor tracts
+                    }
+                    y += 50;
+                    if (i == maxNumBoxes) {
+                        break;
+                    }
                 }
-                x += 50;
-                if (i == maxNumBoxes) {
-                    break;
+                for (auto &iter: searchVals) { // search text display
+                    window.draw(iter);
                 }
-            }
-            for (auto &iter: searchTexts) { // search text display
-                window.draw(iter);
-            }
+            //} else {
+                y = 200;
+                for (int i = 1; i <= numBoxes; i++) {
+                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
+                    if (numBoxes <= maxNumBoxes) {
+                        window.draw(cursor); //cursor tracts
+                    }
+                    y += 50;
+                    if (i == maxNumBoxes) {
+                        break;
+                    }
+                }
+                for (auto &iter: searchTexts) { // search text display
+                    window.draw(iter);
+                }
+            //}
         } else {
             searchTexts.clear();
             window.draw(initialQ);
