@@ -14,6 +14,7 @@ class PriorityQ {
 private:
     struct Node {
         string data;
+        string title;
         int score;
     };
 
@@ -73,9 +74,16 @@ public:
     PriorityQ(){
         size = 0; //size of queue
     }
-    void insert(string data){
+    ~PriorityQ() {
+        for (Node* node: pQ) {
+            delete node;
+        }
+        pQ.clear();
+    }
+    void insert(string data, string title){
         Node* node  = new Node;
         node->data = data;
+        node->title = title;
         node->score = debugScore(node); // debug tactic to make sure the minheap works
 
         pQ.push_back(node);
@@ -89,9 +97,9 @@ public:
         }
     }
 
-    void extractedVal(){
+    string extractedVal(){
         Node* node = extractMin();
-        cout << node->data << endl;
+        return node->title;
     }
 };
 
