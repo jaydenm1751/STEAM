@@ -104,33 +104,29 @@ static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int wid
 static void makeGUI() {
     unordered_map <string, ConsoleNode*> ConsoleGames;
     unordered_map <string, AppNode*> AppGames;
-    PriorityQ q1;
-    PriorityQ q2;
-    PriorityQ q3;
-    PriorityQ q4;
     unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
             {"title", [](const ConsoleNode& node) -> string { return node.Title; }},
-            {"players", [](const ConsoleNode& node) -> int { return node.players; }},
+            {"players", [](const ConsoleNode& node) -> bool { return node.players > 1; }},
             {"online", [](const ConsoleNode& node) -> bool { return node.online; }},
-            {"genres", [](const ConsoleNode& node) -> vector<string> { return node.genres; }},
+            {"genre", [](const ConsoleNode& node) -> vector<string> { return node.genres; }},
             {"price", [](const ConsoleNode& node) -> float { return node.price; }},
             {"console", [](const ConsoleNode& node) -> vector<string> { return node.console; }},
             {"rating", [](const ConsoleNode& node) -> string { return node.rating; }},
             {"release", [](const ConsoleNode& node) -> float { return node.release; }},
     };
     unordered_map<std::string, std::function<std::any(const AppNode&)>> appTraits = {
-            {"title", [](const AppNode& node) -> std::any { return node.Title; }},
+            {"title", [](const AppNode& node) -> string { return node.Title; }},
             {"rating", [](const AppNode& node) -> float { return node.rating; }},
             {"ratingCount", [](const AppNode& node) -> int { return node.ratingCount; }},
             {"price", [](const AppNode& node) -> float { return node.price; }},
-            {"inAppPurchases", [](const AppNode& node) -> std::any { return node.inAppPurchases; }},
-            {"developer", [](const AppNode& node) -> std::any { return node.developer; }},
-            {"age", [](const AppNode& node) -> std::any { return node.age; }},
-            {"languages", [](const AppNode& node) -> std::any { return node.languages; }},
-            {"size", [](const AppNode& node) -> std::any { return node.size; }},
-            {"genres", [](const AppNode& node) -> std::any { return node.genres; }},
-            {"releaseDate", [](const AppNode& node) -> std::any { return node.releaseDate; }},
-            {"updateData", [](const AppNode& node) -> std::any { return node.updateData; }},
+            {"inAppPurchases", [](const AppNode& node) -> vector<float> { return node.inAppPurchases; }},
+            {"developer", [](const AppNode& node) -> string { return node.developer; }},
+            {"age", [](const AppNode& node) -> string { return node.age; }},
+            {"languages", [](const AppNode& node) -> vector<string> { return node.languages; }},
+            {"size", [](const AppNode& node) -> long long unsigned { return node.size; }},
+            {"genres", [](const AppNode& node) -> vector<string> { return node.genres; }},
+            {"releaseDate", [](const AppNode& node) -> string { return node.releaseDate; }},
+            {"updateData", [](const AppNode& node) -> string { return node.updateData; }},
     };
 
     auto start_time = chrono::steady_clock::now();
@@ -285,16 +281,28 @@ static void makeGUI() {
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
+                    PriorityQ q1;
+                    PriorityQ q2;
+                    PriorityQ q3;
+                    PriorityQ q4;
                     for (int j = 0; j < searchParams.size(); j++) {
+                        int q1Size = 0;
                         auto iter = ConsoleGames.begin();
                         string param = searchParams.at(j);
+                        string val = givenVals.at(j);
+                        if(param.find('\r') == 0)
+                            param = param.substr(1);
+                        if(param.find(' ') == param.size() - 1)
+                            param = param.substr(0,param.size() - 1);
+                        if(val.find('\r') == 0)
+                            val = val.substr(1);
                         transform(param.begin(), param.end(), param.begin(),
                                   [](unsigned char c) { return std::tolower(c); });
                         //TODO: Have input handling for all possible search parameters
                         if (param == "price" || param == "release") {
                             while (iter != ConsoleGames.end()) {
                                 float gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
-                                float queueVal = abs(stof(givenVals.at(j)) - gameTraitValue);
+                                float queueVal = abs(stof(val) - gameTraitValue);
                                 if (j == 0)
                                     q1.insert(to_string(queueVal), iter->second->Title);
                                 else if (j == 1)
@@ -305,14 +313,64 @@ static void makeGUI() {
                                     q4.insert(to_string(queueVal), iter->second->Title);
                                 iter++;
                             }
-                            for (int i = 0; i < 100; i++) {
+                        }
+                        if (param == "rating" || param == "genre" || param == "console") {
+                            int base = 0;
+                            for (char k : val) {
+                                base += k;
+                            }
+                            if (param != "rating") {
+
+                            } else {
+                                while (iter != ConsoleGames.end()) {
+                                    int comp = 0;
+                                    for (char k : iter->second->rating) {
+                                        comp += k;
+                                    }
+                                    int queueVal = abs(base - comp);
+                                    if (j == 0)
+                                        q1.insert(to_string(queueVal), iter->second->Title);
+                                    else if (j == 1)
+                                        q2.insert(to_string(queueVal), iter->second->Title);
+                                    else if (j == 2)
+                                        q3.insert(to_string(queueVal), iter->second->Title);
+                                    else
+                                        q4.insert(to_string(queueVal), iter->second->Title);
+                                    iter++;
+                                }
+                            }
+                        }
+                        if (j == 0) {
+                            q1Size = q1.getSize();
+                            for (int i = 0; i < q1Size; i++) {
                                 string key = q1.extractedVal();
                                 transform(key.begin(), key.end(), key.begin(),
                                           [](unsigned char c) { return std::tolower(c); });
                                 cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
                             }
+                        } else if (j == 1) {
+                            for (int i = 0; i < q2.getSize(); i++) {
+                                string key = q2.extractedVal();
+                                transform(key.begin(), key.end(), key.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->price << "\n";
+                            }
+                        } else if (j == 2) {
+                            for (int i = 0; i < q3.getSize(); i++) {
+                                string key = q3.extractedVal();
+                                transform(key.begin(), key.end(), key.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->release << "\n";
+                            }
+                        } else {
+                            for (int i = 0; i < q3.getSize(); i++) {
+                                string key = q3.extractedVal();
+                                transform(key.begin(), key.end(), key.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
+                            }
                         }
-                        cout << "Here is 100 games that fit your preferences of " << searchParams.at(j) << "\n";
+                        cout << "Here is " << q1Size << " games that fit your preferences of " << param << "\n";
                     }
                     givenVals.clear();
                     searchParams.clear();
@@ -522,7 +580,6 @@ static void makeGUI() {
 
         if (typeChosen && !pacmanClicked && !shieldClicked && !pokeballClicked) {
             if (parametersQ) {
-                // if (parameterGiven){
                 int y = 200;
                 for (int i = 1; i <= valBoxes; i++) {
                     makeInputBox(window, 200, 40, 845, y); // search boxes pop up
@@ -537,7 +594,6 @@ static void makeGUI() {
                 for (auto &iter: searchVals) { // search text display
                     window.draw(iter);
                 }
-                //} else {
                 y = 200;
                 for (int i = 1; i <= numBoxes; i++) {
                     makeInputBox(window, 300, 40, 525, y); // search boxes pop up
@@ -552,7 +608,6 @@ static void makeGUI() {
                 for (auto &iter: searchTexts) { // search text display
                     window.draw(iter);
                 }
-                //}
             } else {
                 searchTexts.clear();
                 window.draw(initialQ);
