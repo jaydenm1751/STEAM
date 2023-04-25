@@ -3,12 +3,14 @@
 //
 
 #include "searchConsoleRanking.h"
-#include <any>
+//#include <vector>
 #include <functional>
 #include "PriorityQ.h"
+#include <any>
 #include <iomanip>
 
-void searchConsoleRanking (unordered_map<string, ConsoleNode*>& ConsoleGames, vector<string>& searchParams, vector<string>& givenVals) {
+vector<ConsoleNode*> searchConsoleRanking (unordered_map<string, ConsoleNode*>& ConsoleGames, vector<string>& searchParams, vector<string>& givenVals) {
+    vector<ConsoleNode*> v;
     unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
             {"player count", [](const ConsoleNode& node) -> float { return (float)node.players; }},
             {"game type", [](const ConsoleNode& node) -> bool { return node.players > 1; }},
@@ -153,6 +155,9 @@ void searchConsoleRanking (unordered_map<string, ConsoleNode*>& ConsoleGames, ve
     int games = (ranked.getSize() > 10) ? 10 : ranked.getSize();
     for (int i = 0; i < games; i++) {
         string bestFits = ranked.extractedVal();
-        cout << i+1 << ": " << ConsoleGames[bestFits]->Title << "\t-\t" << fixed << setprecision(4) << mappedRanks[bestFits] << '\n';
+//        cout << i+1 << ": " << ConsoleGames[bestFits]->Title << "\t-\t" << fixed << setprecision(4) << mappedRanks[bestFits] << '\n';
+
+        v.push_back(ConsoleGames[bestFits]);
     }
+    return v;
 }

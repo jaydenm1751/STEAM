@@ -8,7 +8,8 @@
 #include "PriorityQ.h"
 #include <iomanip>
 
-void searchAppRanking(unordered_map<string, AppNode*>& AppGames, vector<string>& searchParams, vector<string>& givenVals) {
+vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vector<string>& searchParams, vector<string>& givenVals) {
+    vector<AppNode*> v;
     unordered_map<string, function<any(const AppNode&)>> appTraits = {
             {"review", [](const AppNode& node) -> float { return node.rating; }},
             {"price", [](const AppNode& node) -> float { return node.price; }},
@@ -95,11 +96,11 @@ void searchAppRanking(unordered_map<string, AppNode*>& AppGames, vector<string>&
                 }
             } else {
                 while (iter != AppGames.end()) {
-                   auto gameTraitValue = any_cast<double>(appTraits[param](*iter->second));
-                   double queueVal = abs(stod(val) - gameTraitValue);
-                   pQ.insert(to_string(queueVal), iter->first);
-                   iter++;
-               }
+                    auto gameTraitValue = any_cast<double>(appTraits[param](*iter->second));
+                    double queueVal = abs(stod(val) - gameTraitValue);
+                    pQ.insert(to_string(queueVal), iter->first);
+                    iter++;
+                }
             }
             if (param != "in-app purchases" && param != "genre") {
                 //Genre and console do not get stored into a priority queue
@@ -133,6 +134,8 @@ void searchAppRanking(unordered_map<string, AppNode*>& AppGames, vector<string>&
     int games = (ranked.getSize() > 10) ? 10 : ranked.getSize();
     for (int i = 0; i < games; i++) {
         string bestFits = ranked.extractedVal();
-        cout << i+1 << ": " << AppGames[bestFits]->Title << "\t-\t" << fixed << setprecision(4) << mappedRanks[bestFits] << '\n';
+        //cout << i+1 << ": " << AppGames[bestFits]->Title << "\t-\t" << fixed << setprecision(4) << mappedRanks[bestFits] << '\n';
+        v.push_back(AppGames[bestFits]);
     }
+    return v;
 }

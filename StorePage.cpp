@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <fstream>
-#include <sstream>
+#include "ConsoleAppsNodes.h"
 #include "searchRanking.h"
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
@@ -118,7 +118,7 @@ static void makeGUI() {
             "Title", "Game Type", "Player Count", "Connectivity", "Genre", "Platform", "Price", "Age Rating", "Publisher", "Release Year"
     };
     vector<string> traits1 = {
-            "Title", "Price", "In-App Purchases", "Genre", "Review", "Age Rating", "Update Year", "Size"
+            "Title", "Price", "In-App Purchases", "Genre", "Review", "Age Rating", "Developer", "Recent Update", "Size", "Languages", "URL"
     };
     unordered_map<string, function<any(const AppNode&)>> appTraits = {
             {"Title", [](const AppNode& node) -> string { return node.Title; }},
@@ -129,7 +129,9 @@ static void makeGUI() {
             {"Developer", [](const AppNode& node) -> string { return node.developer; }},
             {"Size", [](const AppNode& node) -> string { return node.size; }},
             {"Genre", [](const AppNode& node) -> vector<string> { return node.genres; }},
-            {"Update Year", [](const AppNode& node) -> string { return node.updateData; }},
+            {"Recent Update", [](const AppNode& node) -> string { return node.updateData; }},
+            {"Languages", [](const AppNode& node) -> vector<string> { return node.languages; }},
+            {"URL", [](const AppNode& node) -> string { return node.url; }}
     };
     //epic
     unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
@@ -251,6 +253,10 @@ static void makeGUI() {
     makeText(errorTitle, font, "This game is not in our Library.", 18, 0, 113);
     errorTitle.setStyle(sf::Text::Bold);
 
+    sf::Sprite searchButton = sf::Sprite(TextureManager::GetTexture("search"));
+    searchButton.setScale(0.25, 0.25);
+    bool searchButtonPressed = false;
+
     sf::Sprite star;
     star = sf::Sprite(TextureManager::GetTexture("star"));
     star.setPosition(323, 53);
@@ -289,7 +295,7 @@ static void makeGUI() {
     sf::Sprite bowser;
     bowser = sf::Sprite(TextureManager::GetTexture("bowser"));
     bowser.setPosition(50, 75);
-    bowser.setScale(3.5f, 4.0f);
+    bowser.setScale(2.0f, 2.0f);
 
     sf::Text backButton;
     makeText(backButton, font, "Back To Parameters", 20, width - 240, 80);
@@ -313,6 +319,7 @@ static void makeGUI() {
     vector <string> givenVals;
     vector <sf::Text> searchTexts;
     vector <sf::Text> searchVals;
+    vector <sf::Text> searchOfGames;
     bool parameterGiven = false;
 
     while (window.isOpen()) {
@@ -339,11 +346,9 @@ static void makeGUI() {
                 sf::Vector2i coordinates = sf::Mouse::getPosition(window);
                 cout << coordinates.x << ", " << coordinates.y << endl;
                 if (respawn.getGlobalBounds().contains(coordinates.x, coordinates.y)) {
-                    //TODO: clear out text boxes, equivalent to start over
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
-                    searchRanking(typeConsole,ConsoleGames, AppGames, searchParams, givenVals);
                     givenVals.clear();
                     searchParams.clear();
                     numBoxes = 1;
@@ -365,6 +370,8 @@ static void makeGUI() {
                     respawnClicked = true;
                     moreInfoClicked = false;
                     titleSearchTraits.clear();
+                    searchButtonPressed = false;
+                    searchOfGames.clear();
                 }
                 if (typeChosen && (validParametersConsole.getGlobalBounds().contains(coordinates.x, coordinates.y)
                     || validParametersIOS.getGlobalBounds().contains(coordinates.x, coordinates.y))){
@@ -401,6 +408,8 @@ static void makeGUI() {
                     allowTextInput = true;
                     displayStar = false;
                     displayGoomba = false;
+                    searchButtonPressed = false;
+                    searchOfGames.clear();
                 }
                 if (!displayStar && console.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     typeConsole = true;
@@ -424,6 +433,163 @@ static void makeGUI() {
                     cursor.setPosition(10, 53);
                     cursor2.setString("");
                 }
+                if (searchButton.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    searchButtonPressed = true;
+                    if (typeConsole) {
+                        auto game = any_cast<vector<ConsoleNode*>>(searchRanking(typeConsole, ConsoleGames, AppGames, searchParams, givenVals));
+                        int y = 250;
+                        for (int i = 0; i < game.size(); i++) {
+                            sf::Text currentGame;
+                            string temp;
+                            string line = to_string(i + 1) + ".) Title: " + game[i]->Title;
+                            makeText(currentGame, font, line, 25, 425, y);
+                            searchOfGames.push_back(currentGame);
+
+                            temp = to_string(game[i]->price);
+                            int index = temp.find('.');
+                            temp = temp.substr(0, index + 3);
+                            line = "Price: " + temp;
+                            makeText(currentGame, font, line, 25, 490, y + 25);
+                            searchOfGames.push_back(currentGame);
+
+                            //second line
+                            line = "Game Type: ";
+                            line += (game[i]->singlePlayer) ? "Single-Player" : "Co-Op";
+//                            line += " Connectivity: ";
+//                            line += (game[i]->online) ? "Online" : "Local";
+                            makeText(currentGame, font, line, 25, 490, y + 50);
+                            searchOfGames.push_back(currentGame);
+
+                            temp = to_string(game[i]->review);
+                            temp = temp.substr(0, 2);
+                            line = "Review: " + temp;
+                            makeText(currentGame, font, line, 25, 490, y + 75);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Release Year: ";
+                            temp = to_string(game[i]->release);
+                            index = temp.find('.');
+                            temp = temp.substr(0, index);
+                            line += temp;
+                            makeText(currentGame, font, line, 25, 490, y + 100);
+                            searchOfGames.push_back(currentGame);
+
+                            line.clear();
+                            line += "Publisher: ";
+                            for (int j = 0; j < game[i]->publishers.size(); j++){
+                                if (game[i]->publishers[game[i]->publishers.size() - 1] == game[i]->publishers[j]){
+                                    line += game[i]->publishers[j];
+                                    continue;
+                                }
+                                line += game[i]->publishers[j] + ", ";
+                            }
+                            makeText(currentGame, font, line, 25, 490, y + 125);
+                            searchOfGames.push_back(currentGame);
+
+                            line.clear();
+                            line += "Platform: ";
+                            for (int j = 0; j < game[i]->console.size(); j++){
+                                if (game[i]->console[game[i]->console.size() - 1] == game[i]->console[j]){
+                                    line += game[i]->console[j];
+                                    continue;
+                                }
+                                line += game[i]->console[j] + ", ";
+                            }
+                            makeText(currentGame, font, line, 25, 490, y + 150);
+                            searchOfGames.push_back(currentGame);
+                            y += 225;
+                        }
+                    } else {
+                        auto game = any_cast<vector<AppNode*>>(searchRanking(typeConsole, ConsoleGames, AppGames, searchParams, givenVals));
+                        int y = 250;
+                        for (int i = 0; i < game.size(); i++) {
+                            sf::Text currentGame;
+                            string temp;
+                            string line = to_string(i + 1) + ".) Title: " + game[i]->Title;
+                            makeText(currentGame, font, line, 25, 425, y);
+                            searchOfGames.push_back(currentGame);
+
+                            temp = to_string(game[i]->price);
+                            int index = temp.find('.');
+                            temp = temp.substr(0, index + 3);
+                            line = "Price: " + temp;
+                            makeText(currentGame, font, line, 25, 490, y + 25);
+                            searchOfGames.push_back(currentGame);
+
+                            //second line
+                            line = "In-App Purchases: ";
+                            int size = (game[i]->inAppPurchases.size() > 5) ? 5 : game[i]->inAppPurchases.size();
+                            for (int j = 0; j < size; j++) {
+                                if (game[i]->inAppPurchases[j] == game[i]->inAppPurchases[size - 1]) {
+                                    line += game[i]->inAppPurchases[j];
+                                    continue;
+                                }
+                                line += game[i]->inAppPurchases[j] + ",";
+                            }
+                            line += (game[i]->inAppPurchases.size() > 5) ? ", ..." : "";
+                            makeText(currentGame, font, line, 25, 490, y + 50);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Genres: ";
+                            size = (game[i]->genres.size() > 5) ? 5 : game[i]->genres.size();
+                            for (int j = 0; j < size; j++) {
+                                if (game[i]->genres[j] == game[i]->genres[size - 1]) {
+                                    line += game[i]->genres[j];
+                                    continue;
+                                }
+                                line += game[i]->genres[j] + ",";
+                            }
+                            line += (game[i]->genres.size() > 5) ? ", ..." : "";
+                            makeText(currentGame, font, line, 25, 490, y + 75);
+                            searchOfGames.push_back(currentGame);
+
+                            temp = to_string(game[i]->rating);
+                            temp = temp.substr(0, 3);
+                            line = "Review: " + temp;
+                            makeText(currentGame, font, line, 25, 490, y + 100);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Age Rating: " + game[i]->age;
+                            makeText(currentGame, font, line, 25, 490, y + 125);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Last Update: " + game[i]->updateData;
+                            makeText(currentGame, font, line, 25, 490, y + 150);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Developer: " + game[i]->developer;
+                            makeText(currentGame, font, line, 25, 490, y + 175);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Size: ";
+                            temp = game[i]->size;
+                            index = temp.find('.');
+                            temp = temp.substr(0, index + 3);
+                            line += temp;
+                            makeText(currentGame, font, line + "MB", 25, 490, y + 200);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "Languages: ";
+                            size = (game[i]->languages.size() > 5) ? 5 : game[i]->languages.size();
+                            for (int j = 0; j < size; j++) {
+                                if (game[i]->languages[j] == game[i]->languages[size - 1]) {
+                                    line += game[i]->languages[j];
+                                    continue;
+                                }
+                                line += game[i]->languages[j] + ",";
+                            }
+                            line += (game[i]->languages.size() > 5) ? ", ..." : "";
+                            makeText(currentGame, font, line, 25, 490, y + 225);
+                            searchOfGames.push_back(currentGame);
+
+                            line = "URL: " + game[i]->url;
+                            makeText(currentGame, font, line, 25, 250, y + 250);
+                            searchOfGames.push_back(currentGame);
+                            y += 320;
+                        }
+                    }
+
+                }
                 if (coal.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 1
                     maxNumBoxes = 1;
                     parametersQ = true;
@@ -431,6 +597,7 @@ static void makeGUI() {
                     selecting = false;
                     cursor.setString("|");
                     cursor.setPosition(475, 250);
+                    searchButton.setPosition(700, 320);
                 }
                 if (iron.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { // option 2
                     maxNumBoxes = 2;
@@ -439,6 +606,9 @@ static void makeGUI() {
                     selecting = false;
                     cursor.setString("|");
                     cursor.setPosition(475, 250);
+                    int increment = (maxNumBoxes - 1) * 50;
+                    int x = 320 + increment;
+                    searchButton.setPosition(700, x);
                 }
                 if (gold.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 3
                     maxNumBoxes = 3;
@@ -447,6 +617,9 @@ static void makeGUI() {
                     selecting = false;
                     cursor.setString("|");
                     cursor.setPosition(475, 250);
+                    int increment = (maxNumBoxes - 1) * 50;
+                    int x = 320 + increment;
+                    searchButton.setPosition(700, x);
                 }
                 if (diamond.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 4
                     maxNumBoxes = 4;
@@ -455,6 +628,9 @@ static void makeGUI() {
                     selecting = false;
                     cursor.setString("|");
                     cursor.setPosition(475, 250);
+                    int increment = (maxNumBoxes - 1) * 50;
+                    int x = 320 + increment;
+                    searchButton.setPosition(700, x);
                 }
             }
             if (parametersQ || isEditing) {
@@ -559,7 +735,8 @@ static void makeGUI() {
                             }
                         }
                     }
-                    //enter on the title search
+                    // enter on the title search
+                    // block describes implementation of enter key
                     if (isEditing && event.key.code == sf::Keyboard::Enter && allowTextInput) {
                         //first line
                         titleSearch = input.toAnsiString();
@@ -582,7 +759,7 @@ static void makeGUI() {
                             int y = 250;
                             for (int i = 0; i < traits.size(); i++){
                                 sf::Text titleTraits;
-                                string temp = traits[i];
+                                //string temp = traits[i];
                                 if(traits[i] == "Platform" || traits[i] == "Genre" || traits[i] == "Publisher"){
                                     auto gameTraitValue = any_cast<vector<string>>(consoleTraits[traits[i]](*foundVal->second));
                                     string s;
@@ -597,8 +774,9 @@ static void makeGUI() {
                                     titleSearchTraits.push_back(titleTraits);
                                 } else {
                                     auto gameTraitValue = any_cast<string>(consoleTraits[traits[i]](*foundVal->second));
+                                    int index = gameTraitValue.find('.');
                                     if (traits[i] == "Price"){
-                                        gameTraitValue = gameTraitValue.substr(0, 5);
+                                        gameTraitValue = gameTraitValue.substr(0, index + 3);
                                     }
                                     makeText(titleTraits, font, traits[i] + ": " + gameTraitValue, 25, 545, y);
                                     titleSearchTraits.push_back(titleTraits);
@@ -612,17 +790,19 @@ static void makeGUI() {
                             //epic
                             for (int i = 0; i < traits1.size(); i++){
                                 sf::Text titleTraits;
-                                string temp = traits[i];
-                                if(traits1[i] == "Genre" || traits1[i] == "In-App Purchases"){
+                                //string temp = traits[i];
+                                if(traits1[i] == "Genre" || traits1[i] == "In-App Purchases" || traits1[i] == "Languages"){
                                     auto gameTraitValue = any_cast<vector<string>>(appTraits[traits1[i]](*foundVal->second));
                                     string s;
-                                    for (int j = 0; j < gameTraitValue.size(); j ++){
-                                        if (gameTraitValue[gameTraitValue.size() - 1] == gameTraitValue[j]){
-                                            s += gameTraitValue[j];
-                                            continue;
+                                    int size = (gameTraitValue.size() > 5) ? 5 : gameTraitValue.size();
+                                        for (int j = 0; j < size; j++) {
+                                            if (gameTraitValue[size - 1] == gameTraitValue[j]) {
+                                                s += gameTraitValue[j];
+                                                continue;
+                                            }
+                                            s += gameTraitValue[j] + ",";
                                         }
-                                        s += gameTraitValue[j] + ",";
-                                    }
+                                        s += (gameTraitValue.size() > 5) ? ", ..." : "";
                                     makeText(titleTraits, font, traits1[i] + ": " + s, 25, 545, y);
                                     titleSearchTraits.push_back(titleTraits);
                                 } else {
@@ -643,6 +823,9 @@ static void makeGUI() {
                                         gameTraitValue = gameTraitValue.substr(0, 3);
                                     }
                                     makeText(titleTraits, font, traits1[i] + ": " + gameTraitValue, 25, 545, y);
+                                    if (traits1[i] == "URL"){
+                                        titleTraits.setPosition(350, y);
+                                    }
                                     titleSearchTraits.push_back(titleTraits);
                                 }
                                 y += 50;
@@ -703,13 +886,13 @@ static void makeGUI() {
             }
         }
 
-        if (typeChosen && typeConsole && !displayStar) {
+        if (typeChosen && typeConsole && !displayStar && !searchButtonPressed) {
             //display of what is valid
             window.draw(validParametersConsole);
             if (moreInfoClicked){ // more info display pops up when clicked
                 window.draw(moreInfoConsole);
             }
-        } else if (typeChosen && !typeConsole && !displayStar) {
+        } else if (typeChosen && !typeConsole && !displayStar && !searchButtonPressed) {
             window.draw(validParametersIOS);
             if(moreInfoClicked) {
                 window.draw(moreInfoIOS);
@@ -719,39 +902,49 @@ static void makeGUI() {
         if (typeChosen && !pacmanClicked && !shieldClicked && !pokeballClicked && !displayStar) { // mobile or console has been chosen
             if (parametersQ) {//chosen number of parameters
                 //Need to say that order matters
-                window.draw(parameterType);
-                window.draw(valEntered);
-                int y = 250;
-                for (int i = 1; i <= valBoxes; i++) {
-                    //number of boxes increments with each enter
-                    makeInputBox(window, 200, 40, 795, y); // search boxes pop up
-                    if (valBoxes <= maxNumBoxes) {
-                        window.draw(cursor); //cursor tracts
-                    }
-                    y += 50;
-                    if (i == maxNumBoxes) {
-                        break;
-                    }
-                }
-                for (auto &iter: searchVals) { // search text display
-                    window.draw(iter);
-                }
                 window.draw(backButton);
                 window.draw(crown);
-                y = 250;
-                for (int i = 1; i <= numBoxes; i++) {
-                    window.draw(priorities[i - 1]);
-                    makeInputBox(window, 300, 40, 475, y); // search boxes pop up
-                    if (numBoxes <= maxNumBoxes) {
-                        window.draw(cursor); //cursor tracts
+                if (!searchButtonPressed){
+                    window.draw(parameterType);
+                    window.draw(valEntered);
+                    int y = 250;
+                    for (int i = 1; i <= valBoxes; i++) {
+                        //number of boxes increments with each enter
+                        makeInputBox(window, 200, 40, 795, y); // search boxes pop up
+                        if (valBoxes <= maxNumBoxes) {
+                            window.draw(cursor); //cursor tracts
+                        }
+                        y += 50;
+                        if (i == maxNumBoxes) {
+                            break;
+                        }
                     }
-                    y += 50;
-                    if (i == maxNumBoxes) {
-                        break;
+                    for (auto &iter: searchVals) { // search text display
+                        window.draw(iter);
                     }
-                }
-                for (auto &iter: searchTexts) { // search text display
-                    window.draw(iter);
+
+                    if (valBoxes > maxNumBoxes) {
+                        window.draw(searchButton);
+                    }
+                    y = 250;
+                    for (int i = 1; i <= numBoxes; i++) {
+                        window.draw(priorities[i - 1]);
+                        makeInputBox(window, 300, 40, 475, y); // search boxes pop up
+                        if (numBoxes <= maxNumBoxes) {
+                            window.draw(cursor); //cursor tracts
+                        }
+                        y += 50;
+                        if (i == maxNumBoxes) {
+                            break;
+                        }
+                    }
+                    for (auto &iter: searchTexts) { // search text display
+                        window.draw(iter);
+                    }
+                } else {
+                    for (auto &iter : searchOfGames){
+                        window.draw(iter);
+                    }
                 }
             } else {
                 searchTexts.clear();

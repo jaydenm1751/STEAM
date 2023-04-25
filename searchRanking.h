@@ -12,9 +12,10 @@
 #include <functional>
 #include "PriorityQ.h"
 #include <iomanip>
+#include <any>
 
 //string anyToString(const any& value);
 
-void searchRanking(bool console, unordered_map<string, ConsoleNode*>& ConsoleGames, unordered_map<string, AppNode*>& AppGames, vector<string>& searchParams, vector<string>& givenVals);
+any searchRanking(bool console, unordered_map<string, ConsoleNode*>& ConsoleGames, unordered_map<string, AppNode*>& AppGames, vector<string>& searchParams, vector<string>& givenVals);
 
 #endif
