@@ -315,6 +315,11 @@ static void makeGUI() {
     vector <sf::Text> searchVals;
     bool parameterGiven = false;
 
+    vector<sf::Text> allGames;
+
+    // Store the initial view windows position to come back to later
+    sf::Vector2f initialViewCenter = view.getCenter();
+
     while (window.isOpen()) {
         sf::Event event{};
         while (window.pollEvent(event)) {
@@ -327,19 +332,29 @@ static void makeGUI() {
                 if (event.mouseWheel.delta > 0) {
                     sf::Vector2f viewPos = view.getCenter();
                     view.move(0, -50);
+                    respawn.move(0, -50);
                     if (view.getCenter().y - view.getSize().y / 2 < 0){
                         view.setCenter(viewPos.x, view.getSize().y / 2);
+                        respawn.setPosition(width - 310, 0);
                     }
                 }
                 else if (event.mouseWheel.delta < 0) {
                     view.move(0, 50);
+                    respawn.move(0, 50);
                 }
             }
             if (event.type == sf::Event::MouseButtonPressed) {
+                // Get the mouse position in the window's coordinates space
                 sf::Vector2i coordinates = sf::Mouse::getPosition(window);
-                cout << coordinates.x << ", " << coordinates.y << endl;
-                if (respawn.getGlobalBounds().contains(coordinates.x, coordinates.y)) {
+
+                // Convert the mouse position to the view's coordinates space
+                sf::Vector2f mousePosView = window.mapPixelToCoords(coordinates, view);
+
+                //cout << coordinates.x << ", " << coordinates.y << endl;
+                if (respawn.getGlobalBounds().contains(mousePosView)) {
                     //TODO: clear out text boxes, equivalent to start over
+                    view.setCenter(initialViewCenter);
+                    respawn.setPosition(width - 310, 0);
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
@@ -353,6 +368,7 @@ static void makeGUI() {
                     cursor.setPosition(0, 0);
                     cursor2.setString("");
                     cursor2.setPosition(0,0);
+                    allGames.clear();
                     allowTextInput = true;
                     displayStar = false;
                     displayGoomba = false;
@@ -367,18 +383,69 @@ static void makeGUI() {
                     titleSearchTraits.clear();
                 }
                 if (typeChosen && (validParametersConsole.getGlobalBounds().contains(coordinates.x, coordinates.y)
-                    || validParametersIOS.getGlobalBounds().contains(coordinates.x, coordinates.y))){
+                                   || validParametersIOS.getGlobalBounds().contains(coordinates.x, coordinates.y))){
                     moreInfoClicked = true;
                 }
-                //TODO: implement button functionality
+                //TODO: Display all console games
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pacmanClicked = true;
+                    allGames.clear();
+                    auto iter = ConsoleGames.begin();
+                    int yPos = 250;
+                    int count = 1;
+                    while (iter != ConsoleGames.end()) {
+                        sf::Text game;
+                        int point = to_string(iter->second->price).find('.');
+                        string price = to_string(iter->second->price).substr(0, point+3);
+                        string review = to_string(iter->second->review).substr(0,2);
+
+                        string textLine = to_string(count) + ".)\tTitle: " + iter->second->Title + "\tPrice: $" + price + "\tPlatforms: ";
+                        for (unsigned int i = 0; i < iter->second->console.size(); i++) {
+                            if (i == iter->second->console.size() - 1) {
+                                textLine += iter->second->console.at(i);
+                            } else {
+                                textLine += iter->second->console.at(i) + ", ";
+                            }
+                        }
+
+                        textLine += "\tScore: " + review;
+
+                        makeText(game, font, textLine, 20, 75, yPos);
+                        allGames.push_back(game);
+                        iter++;
+                        count++;
+                        yPos += 30;
+                    }
                 }
+                //TODO: About developers (if time)
                 if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pokeballClicked = true;
                 }
+                //TODO: Display all 17k app games
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
+                    allGames.clear();
+                    auto iter = AppGames.begin();
+                    int yPos = 250;
+                    int count = 1;
+                    while (iter != AppGames.end()) {
+                        sf::Text game;
+                        int point = iter->second->size.find('.');
+                        string size = iter->second->size.substr(0,point+3);
+                        point = to_string(iter->second->price).find('.');
+                        string price = to_string(iter->second->price).substr(0, point+3);
+                        string rating = to_string(iter->second->rating).substr(0, 3);
+
+//                        point = price.find('.');
+//                        price = price.substr(0,point+3);
+                        string textLine = to_string(count) + ".) Title: " + iter->second->Title + "\tPrice: $" + price + "\tScore: " + rating
+                                + "\tDeveloper: " + iter->second->developer + "\tSize: " + size + "MB\n";
+                        makeText(game, font, textLine, 20, 75, yPos);
+                        allGames.push_back(game);
+                        iter++;
+                        count++;
+                        yPos += 30;
+                    }
                 }
                 if (crown.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     crownClicked = true;
@@ -668,7 +735,11 @@ static void makeGUI() {
                     }
                 }
             }
+            if (displayStar) {
+                allGames.clear();
+            }
         }
+
         // order should be clear, draw, display.
         window.clear(sf::Color::Cyan);
         //permanent draw funcs
@@ -684,7 +755,7 @@ static void makeGUI() {
         window.draw(sByTitle);
         window.draw(titleBox);
         //if title box is clicked write there
-        if(isEditing && !parametersQ && !pacmanClicked && !shieldClicked && !pokeballClicked){
+        if(isEditing && !parametersQ){
             window.draw(cursor);
             window.draw(cursor2);
         }
@@ -770,12 +841,15 @@ static void makeGUI() {
             window.draw(console);
         }
         //window.draw(chief);
-        window.draw(respawn); //home button
 
         //new window display
         if (pacmanClicked || pokeballClicked || shieldClicked){ //display god
-            window.draw(bowser);
+            //window.draw(bowser);
+            for (sf::Text& item : allGames) {
+                window.draw(item);
+            }
         }
+        window.draw(respawn); //home button
 
         window.display();
     }
