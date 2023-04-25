@@ -15,11 +15,11 @@ struct AppNode {
     float rating;
     int ratingCount;
     float price; //search
-    vector<float> inAppPurchases; //search
+    vector<string> inAppPurchases; //search
     string developer;
     string age; //search
     vector<string> languages;
-    unsigned long long size; //search
+    string size; //search
     vector<string> genres; //search
     string releaseDate;
     string updateData; //search
@@ -31,17 +31,17 @@ struct ConsoleNode {
     bool singlePlayer{};
     bool online{}; //search
     vector<string> genres; //search
-    string publishers;
+    vector<string> publishers;
     float review{}; //search
     float sales{};
     float price{}; //search
     vector<string> console; //search
     string rating; //search
     float release{}; //search
-    float allPlayStyle{};
-    vector<float> completionists;
-    vector<float> storyDLC;
-    vector<float> story;
+    string allPlayStyle;
+    vector<string> completionists;
+    vector<string> storyDLC;
+    vector<string> story;
 };
 
 static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
@@ -64,24 +64,24 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
         }
         catalogue[key]->price = stof(data.at(6));
         if (data.at(index) == "N/A") {
-            catalogue[key]->inAppPurchases.push_back(0.0);
+            catalogue[key]->inAppPurchases.emplace_back("0.00");
             index++;
         } else {
             if (data.at(index).find("\"") == 0) {
-                catalogue[key]->inAppPurchases.push_back(stof(data.at(index).substr(1)));
+                catalogue[key]->inAppPurchases.push_back(data.at(index).substr(1));
                 index++;
                 while (true) {
                     if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
                         catalogue[key]->inAppPurchases.push_back(
-                                stof(data.at(index).substr(0, data.at(index).size() - 1)));
+                                data.at(index).substr(0, data.at(index).size() - 1));
                         index++;
                         break;
                     }
-                    catalogue[key]->inAppPurchases.push_back(stof(data.at(index)));
+                    catalogue[key]->inAppPurchases.push_back(data.at(index));
                     index++;
                 }
             } else {
-                catalogue[key]->inAppPurchases.push_back(stof(data.at(7)));
+                catalogue[key]->inAppPurchases.push_back(data.at(7));
                 index++;
             }
         }
@@ -110,7 +110,8 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
                 index++;
             }
         }
-        catalogue[key]->size = stoull(data.at(index));
+        string sizeMB = to_string(stold(data.at(index)) / 1000000.0);
+        catalogue[key]->size = sizeMB;
         index++;
         if (data.at(index) == "N/A") {
             catalogue[key]->genres.emplace_back("Unavailable");
@@ -156,6 +157,7 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
             while (true) {
                 if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
                     catalogue[key]->genres.push_back(data.at(index).substr(0, data.at(index).size()-1));
+                    index++;
                     break;
                 }
                 catalogue[key]->genres.push_back(data.at(index));
@@ -163,25 +165,39 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
             }
         } else {
             catalogue[key]->genres.push_back(data.at(3));
+            index++;
+        }
+        if (data.at(index).find("\"") == 0) {
+            catalogue[key]->publishers.push_back(data.at(index).substr(1));
+            index++;
+            while (true) {
+                if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                    catalogue[key]->publishers.push_back(data.at(index).substr(0, data.at(index).size()-1));
+                    break;
+                }
+                catalogue[key]->publishers.push_back(data.at(index));
+                index++;
+            }
+        } else {
+            catalogue[key]->publishers.push_back(data.at(data.size()-17));
         }
         //Strange indexing due to need to index from back, since we don't know how many genres there are
-        catalogue[key]->publishers = data.at(data.size()-17);
         catalogue[key]->review = stoi(data.at(data.size()-16));
         catalogue[key]->sales = stof(data.at(data.size()-15));
         catalogue[key]->price = stof(data.at(data.size()-14));
         catalogue[key]->console.push_back(data.at(data.size()-13));
         catalogue[key]->rating = data.at(data.size()-12);
         catalogue[key]->release = stoi(data.at(data.size()-11));
-        catalogue[key]->allPlayStyle = stof(data.at(data.size()-10));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-9)));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-8)));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-7)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-6)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-5)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-4)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-3)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-2)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-1)));
+        catalogue[key]->allPlayStyle = data.at(data.size()-10);
+        catalogue[key]->completionists.push_back(data.at(data.size()-9));
+        catalogue[key]->completionists.push_back(data.at(data.size()-8));
+        catalogue[key]->completionists.push_back(data.at(data.size()-7));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-6));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-5));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-4));
+        catalogue[key]->story.push_back(data.at(data.size()-3));
+        catalogue[key]->story.push_back(data.at(data.size()-2));
+        catalogue[key]->story.push_back(data.at(data.size()-1));
     } else {
         catalogue[key]->console.push_back(data.at(data.size() - 13)); //minus 13 because there is unknown amount of genre, so have to index from the back
     }
