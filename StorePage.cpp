@@ -432,24 +432,32 @@ static void makeGUI() {
                     parametersQ = true;
                     isEditing = false;
                     selecting = false;
+                    cursor.setString("|");
+                    cursor.setPosition(475, 250);
                 }
                 if (iron.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { // option 2
                     maxNumBoxes = 2;
                     parametersQ = true;
                     isEditing = false;
                     selecting = false;
+                    cursor.setString("|");
+                    cursor.setPosition(475, 250);
                 }
                 if (gold.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 3
                     maxNumBoxes = 3;
                     parametersQ = true;
                     isEditing = false;
                     selecting = false;
+                    cursor.setString("|");
+                    cursor.setPosition(475, 250);
                 }
                 if (diamond.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 4
                     maxNumBoxes = 4;
                     parametersQ = true;
                     isEditing = false;
                     selecting = false;
+                    cursor.setString("|");
+                    cursor.setPosition(475, 250);
                 }
             }
             if (parametersQ || isEditing) {
@@ -509,51 +517,47 @@ static void makeGUI() {
                         }
                     }
                     if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes + 1 && allowTextInput) {
-//                        if(!crownClicked) {
-                            if (!parameterGiven) {
-                                searchParameter1 = input.toAnsiString();
-                                searchParams.push_back(searchParameter1);
-                                if (numBoxes > maxNumBoxes) {
-                                    allowTextInput = false;
-                                }
-                               // if (!crownClicked && !respawnClicked) {
-                                    numBoxes++;
-                                //}
-                                crownClicked = false;
-                                respawnClicked = false;
-                                parameterGiven = true;
-                                int increment = (numBoxes - 2) * 50;
-                                int x = 250 + increment;
-                                makeText(searchParameterDisplay, font, searchParameter1, 30, 475, x);
-                                //searchParameterDisplay.setStyle(sf::Text::Bold);
-                                input.clear();
-                                searchTexts.push_back(searchParameterDisplay);
-                                if (!searchParameter1.empty()) {
-                                    transform(searchParameter1.begin(), searchParameter1.end(),
-                                              searchParameter1.begin(),
-                                              [](unsigned char c) { return std::tolower(c); });
-                                    cout << searchParameter1 << endl;
-                                }
-                            } else {
-                                valueToSearch = input.toAnsiString();
-                                givenVals.push_back(valueToSearch);
-                                if (valBoxes > maxNumBoxes) {
-                                    allowTextInput = false;
-                                }
-                                if (!crownClicked && !respawnClicked) {
-                                    valBoxes++;
-                                }
-                                parameterGiven = false;
-                                input.clear();
-                                int increment = (numBoxes - 2) * 50;
-                                int x = 250 + increment;
-                                makeText(valueToSearchDisplay, font, valueToSearch, 25, 795, x);
-                                searchVals.push_back(valueToSearchDisplay);
-                                if (!valueToSearch.empty()) {
-                                    transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
-                                              [](unsigned char c) { return std::tolower(c); });
-                                    cout << valueToSearch << endl;
-                                }
+                        if (!parameterGiven) {
+                            searchParameter1 = input.toAnsiString();
+                            searchParams.push_back(searchParameter1);
+                            if (numBoxes > maxNumBoxes) {
+                                allowTextInput = false;
+                            }
+                           numBoxes++;
+                            crownClicked = false;
+                            respawnClicked = false;
+                            parameterGiven = true;
+                            int increment = (numBoxes - 2) * 50;
+                            int x = 250 + increment;
+                            makeText(searchParameterDisplay, font, searchParameter1, 30, 475, x);
+                            //searchParameterDisplay.setStyle(sf::Text::Bold);
+                            input.clear();
+                            searchTexts.push_back(searchParameterDisplay);
+                            if (!searchParameter1.empty()) {
+                                transform(searchParameter1.begin(), searchParameter1.end(),
+                                          searchParameter1.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << searchParameter1 << endl;
+                            }
+                        } else {
+                            valueToSearch = input.toAnsiString();
+                            givenVals.push_back(valueToSearch);
+                            if (valBoxes > maxNumBoxes) {
+                                allowTextInput = false;
+                            }
+                            if (!crownClicked && !respawnClicked) {
+                                valBoxes++;
+                            }
+                            parameterGiven = false;
+                            input.clear();
+                            int increment = (numBoxes - 2) * 50;
+                            int x = 250 + increment;
+                            makeText(valueToSearchDisplay, font, valueToSearch, 25, 795, x);
+                            searchVals.push_back(valueToSearchDisplay);
+                            if (!valueToSearch.empty()) {
+                                transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
+                                          [](unsigned char c) { return std::tolower(c); });
+                                cout << valueToSearch << endl;
                             }
                         }
                     }
@@ -621,7 +625,8 @@ static void makeGUI() {
                 }
                 int y = 250;
                 for (int i = 1; i <= valBoxes; i++) {
-                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
+                    window.draw(priorities[i - 1]);
+                    makeInputBox(window, 200, 40, 795, y); // search boxes pop up
                     if (valBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
@@ -637,7 +642,7 @@ static void makeGUI() {
                 window.draw(crown);
                 y = 250;
                 for (int i = 1; i <= numBoxes; i++) {
-                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
+                    makeInputBox(window, 300, 40, 475, y); // search boxes pop up
                     if (numBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
