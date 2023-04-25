@@ -5,8 +5,7 @@
 #ifndef SEARCH_RANKING_H
 #define SEARCH_RANKING_H
 
-#include "ConsoleAppsNodes.cpp"
-#include "searchRanking.h"
+#include "ConsoleAppsNodes.h"
 #include <unordered_map>
 #include <iostream>
 #include <any>

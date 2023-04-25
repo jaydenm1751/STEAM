@@ -1,50 +1,9 @@
 //
 // Created by caleb on 4/22/2023.
 //
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <algorithm>
-using namespace std;
+#include "ConsoleAppsNodes.h"
 
-struct AppNode {
-    string Title;
-    string url;
-    int ID;
-    string iconURL;
-    float rating;
-    int ratingCount;
-    float price; //search
-    vector<string> inAppPurchases; //search
-    string developer;
-    string age; //search
-    vector<string> languages;
-    string size; //search
-    vector<string> genres; //search
-    string releaseDate;
-    string updateData; //search
-};
-
-struct ConsoleNode {
-    string Title;
-    int players{}; //search if it is single player or coop (1 or more than 1)
-    bool singlePlayer{};
-    bool online{}; //search
-    vector<string> genres; //search
-    vector<string> publishers;
-    float review{}; //search
-    float sales{};
-    float price{}; //search
-    vector<string> console; //search
-    string rating; //search
-    float release{}; //search
-    string allPlayStyle;
-    vector<string> completionists;
-    vector<string> storyDLC;
-    vector<string> story;
-};
-
-static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
+void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
     if ((data.at(2).find("\\u") == string::npos) && (data.at(2).find("\\x") == string::npos) && (data.at(3).find("ht") == 0) && (data.at(2).find("\"") != 0)) {
         string key = data.at(2);
         int index = 7;
@@ -136,7 +95,7 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
     }
 }
 
-static void insertConsoleData(vector<string>& data, unordered_map<string, ConsoleNode*>& catalogue) {
+void insertConsoleData(vector<string>& data, unordered_map<string, ConsoleNode*>& catalogue) {
     string key = data.at(0);
     int index = 3;
     transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });

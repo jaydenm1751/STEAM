@@ -4,8 +4,9 @@
 
 #ifndef SEARCH_APP_RANKING_H
 #define SEARCH_APP_RANKING_H
-#include "searchRanking.h"
-
+#include <iostream>
+#include "ConsoleAppsNodes.h"
+using namespace std;
 
 void searchAppRanking(unordered_map<string, AppNode*>& AppGames, vector<string>& searchParams, vector<string>& givenVals);
 
