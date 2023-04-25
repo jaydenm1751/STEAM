@@ -964,7 +964,7 @@ static void makeGUI() {
             if (moreInfoClicked){ // more info display pops up when clicked
                 window.draw(moreInfoConsole);
             }
-        } else if (typeChosen && !typeConsole && !displayStar) {
+        } else if (typeChosen && !typeConsole && !displayStar && !searchButtonPressed) {
             window.draw(validParametersIOS);
             if(moreInfoClicked) {
                 window.draw(moreInfoIOS);
