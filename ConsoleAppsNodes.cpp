@@ -1,49 +1,9 @@
 //
 // Created by caleb on 4/22/2023.
 //
-#include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <algorithm>
-using namespace std;
+#include "ConsoleAppsNodes.h"
 
-struct AppNode {
-    string Title;
-    string url;
-    int ID;
-    string iconURL;
-    float rating;
-    int ratingCount;
-    float price;
-    vector<float> inAppPurchases;
-    string developer;
-    string age;
-    vector<string> languages;
-    unsigned long long size;
-    vector<string> genres;
-    string releaseDate;
-    string updateData;
-};
-
-struct ConsoleNode {
-    string Title;
-    int players{}; //search if it is single player or coop (1 or more than 1)
-    bool online{}; //search
-    vector<string> genres; //search
-    string publishers;
-    int review{};
-    float sales{};
-    float price{}; //search
-    vector<string> console; //search
-    string rating; //search
-    float release{}; //search
-    float allPlayStyle{};
-    vector<float> completionists;
-    vector<float> storyDLC;
-    vector<float> story;
-};
-
-static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
+void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
     if ((data.at(2).find("\\u") == string::npos) && (data.at(2).find("\\x") == string::npos) && (data.at(3).find("ht") == 0) && (data.at(2).find("\"") != 0)) {
         string key = data.at(2);
         int index = 7;
@@ -63,24 +23,24 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
         }
         catalogue[key]->price = stof(data.at(6));
         if (data.at(index) == "N/A") {
-            catalogue[key]->inAppPurchases.push_back(0.0);
+            catalogue[key]->inAppPurchases.emplace_back("0.00");
             index++;
         } else {
             if (data.at(index).find("\"") == 0) {
-                catalogue[key]->inAppPurchases.push_back(stof(data.at(index).substr(1)));
+                catalogue[key]->inAppPurchases.push_back(data.at(index).substr(1));
                 index++;
                 while (true) {
                     if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
                         catalogue[key]->inAppPurchases.push_back(
-                                stof(data.at(index).substr(0, data.at(index).size() - 1)));
+                                data.at(index).substr(0, data.at(index).size() - 1));
                         index++;
                         break;
                     }
-                    catalogue[key]->inAppPurchases.push_back(stof(data.at(index)));
+                    catalogue[key]->inAppPurchases.push_back(data.at(index));
                     index++;
                 }
             } else {
-                catalogue[key]->inAppPurchases.push_back(stof(data.at(7)));
+                catalogue[key]->inAppPurchases.push_back(data.at(7));
                 index++;
             }
         }
@@ -109,7 +69,8 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
                 index++;
             }
         }
-        catalogue[key]->size = stoull(data.at(index));
+        string sizeMB = to_string(stold(data.at(index)) / 1000000.0);
+        catalogue[key]->size = sizeMB;
         index++;
         if (data.at(index) == "N/A") {
             catalogue[key]->genres.emplace_back("Unavailable");
@@ -134,7 +95,7 @@ static void insertAppData(vector<string>& data, unordered_map<string, AppNode*>&
     }
 }
 
-static void insertConsoleData(vector<string>& data, unordered_map<string, ConsoleNode*>& catalogue) {
+void insertConsoleData(vector<string>& data, unordered_map<string, ConsoleNode*>& catalogue) {
     string key = data.at(0);
     int index = 3;
     transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -143,6 +104,11 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
         catalogue[key]->Title = data.at(0);
         //cout << catalogue.size() << "\t" << data.at(0) << "\t\t\t" << data.at(1) << "\t" << data.at(8) << endl;
         catalogue[key]->players = stoi(data.at(1));
+        if(stoi(data.at(1)) == 1) {
+            catalogue[key]->singlePlayer = true;
+        } else {
+            catalogue[key]->singlePlayer = false;
+        }
         catalogue[key]->online = (data.at(2) == "TRUE");
         if (data.at(index).find("\"") == 0) {
             catalogue[key]->genres.push_back(data.at(index).substr(1));
@@ -150,6 +116,7 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
             while (true) {
                 if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
                     catalogue[key]->genres.push_back(data.at(index).substr(0, data.at(index).size()-1));
+                    index++;
                     break;
                 }
                 catalogue[key]->genres.push_back(data.at(index));
@@ -157,25 +124,39 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
             }
         } else {
             catalogue[key]->genres.push_back(data.at(3));
+            index++;
+        }
+        if (data.at(index).find("\"") == 0) {
+            catalogue[key]->publishers.push_back(data.at(index).substr(1));
+            index++;
+            while (true) {
+                if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                    catalogue[key]->publishers.push_back(data.at(index).substr(0, data.at(index).size()-1));
+                    break;
+                }
+                catalogue[key]->publishers.push_back(data.at(index));
+                index++;
+            }
+        } else {
+            catalogue[key]->publishers.push_back(data.at(data.size()-17));
         }
         //Strange indexing due to need to index from back, since we don't know how many genres there are
-        catalogue[key]->publishers = data.at(data.size()-17);
         catalogue[key]->review = stoi(data.at(data.size()-16));
         catalogue[key]->sales = stof(data.at(data.size()-15));
         catalogue[key]->price = stof(data.at(data.size()-14));
         catalogue[key]->console.push_back(data.at(data.size()-13));
         catalogue[key]->rating = data.at(data.size()-12);
         catalogue[key]->release = stoi(data.at(data.size()-11));
-        catalogue[key]->allPlayStyle = stof(data.at(data.size()-10));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-9)));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-8)));
-        catalogue[key]->completionists.push_back(stof(data.at(data.size()-7)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-6)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-5)));
-        catalogue[key]->storyDLC.push_back(stof(data.at(data.size()-4)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-3)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-2)));
-        catalogue[key]->story.push_back(stof(data.at(data.size()-1)));
+        catalogue[key]->allPlayStyle = data.at(data.size()-10);
+        catalogue[key]->completionists.push_back(data.at(data.size()-9));
+        catalogue[key]->completionists.push_back(data.at(data.size()-8));
+        catalogue[key]->completionists.push_back(data.at(data.size()-7));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-6));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-5));
+        catalogue[key]->storyDLC.push_back(data.at(data.size()-4));
+        catalogue[key]->story.push_back(data.at(data.size()-3));
+        catalogue[key]->story.push_back(data.at(data.size()-2));
+        catalogue[key]->story.push_back(data.at(data.size()-1));
     } else {
         catalogue[key]->console.push_back(data.at(data.size() - 13)); //minus 13 because there is unknown amount of genre, so have to index from the back
     }
