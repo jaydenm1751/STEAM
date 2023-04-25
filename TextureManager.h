@@ -15,6 +15,11 @@ private:
         path += textureName + ".png";
         textures[textureName].loadFromFile(path);
     }
+//    static void LoadTextureDigits(string textureName, int number){
+//        string path = "files/images/" + textureName + ".png";
+//        //works for 1
+//        textures[textureName + std::to_string(number)].loadFromFile(path, sf::IntRect(5 * number, 0, 50, 50));
+//    }
 public:
     static sf::Texture& GetTexture(string textureName){
         if (textures.find(textureName) == textures.end()){
@@ -22,4 +27,10 @@ public:
         }
         return textures[textureName];
     }
+//    static sf::Texture& GetTextureDigits(string textureName, int number){
+//        if (textures.find(textureName + (std::to_string(number))) == textures.end()){
+//            LoadTextureDigits(textureName, number);
+//        }
+//        return textures[textureName + (std::to_string(number))];
+//    }
 };

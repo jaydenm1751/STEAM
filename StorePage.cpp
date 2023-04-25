@@ -14,6 +14,8 @@
 #include "PriorityQ.h"
 #include <functional>
 #include <any>
+#include <TGUI/TGUI.hpp>
+
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
 
@@ -47,6 +49,8 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
         }
     }
 }
+
+// "price " == "price"
 
 //TODO: Implement the App hash table
 static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
@@ -149,16 +153,29 @@ static void makeGUI() {
     //font.loadFromFile("files/Anuphan-VariableFont_wght.ttf");
     font.loadFromFile("files/CourierPrime-Regular.ttf");
     sf::Text cursor;
-    makeText(cursor, font, "|", 20, (height / 2) + 100, 200);
+    makeText(cursor, font, "|", 20, 475, 250);
     sf::Text cursor2;
     makeText(cursor2, font, "|", 20, 0, 0);
     sf::String input = "";
     sf::Text waterVaporText;
-    makeText(waterVaporText, font, "WaterVapor Gaming", 60, height / 2, 100);
+    makeText(waterVaporText, font, "WaterVapor Gaming", 60, height / 2, 125);
     sf::Text initialQ;
     makeText(initialQ, font, "How many parameters would you like to search by?", 35, 325, 200);
     sf::Text sByTitle;
     makeText(sByTitle, font, "Enter Title here: ", 35, 0, 0);
+    sf::Text parameterType;
+    makeText(parameterType, font, "Parameter Type", 25, 525, 210);
+    sf::Text valEntered;
+    makeText(valEntered, font, "Value", 25, 855, 210);
+    sf::Sprite validParametersConsole = sf::Sprite(TextureManager::GetTexture("validConsoleParameters"));
+    validParametersConsole.setPosition(40, 550);
+    sf::Sprite validParametersIOS = sf::Sprite(TextureManager::GetTexture("validMobileParameters"));
+    validParametersIOS.setPosition(100, 550);
+    sf::Sprite moreInfoConsole = sf::Sprite(TextureManager::GetTexture("consoleMoreInfo"));
+    moreInfoConsole.setPosition(600, 550);
+    sf::Sprite moreInfoIOS = sf::Sprite(TextureManager::GetTexture("mobileMoreInfo"));
+    moreInfoIOS.setPosition(700, 533);
+    bool moreInfoClicked = false;
 
     int numHeight = 240;
     vector <sf::Text> initialNumbers;
@@ -196,6 +213,17 @@ static void makeGUI() {
     sf::Text initialQ2;
     makeText(initialQ2, font, "What type of game are you searching?", 35, 325, 200);
 
+    sf::Sprite priority;
+    vector<sf::Sprite> priorities;
+    int nY = 250;
+    for(int i = 1; i <= 4; i++){
+        priority = sf::Sprite(TextureManager::GetTexture(to_string(i)));
+        priority.setPosition(350, nY);
+        priority.setScale(0.2f, 0.2f);
+        priorities.push_back(priority);
+        nY += 50;
+    }
+
     sf::Text searchParameterDisplay;
     string searchParameter1;
     sf::Text valueToSearchDisplay;
@@ -220,17 +248,23 @@ static void makeGUI() {
     bool displayStar = false;
     bool selecting = true;
 
+    sf::Text browseConsole;
+    makeText(browseConsole, font, "Browse All Console Games", 15, 655, 100);
     sf::Sprite pacman;
     pacman = sf::Sprite(TextureManager::GetTexture("pacman"));
-    pacman.setPosition(650, 0);
+    pacman.setPosition(725, 0);
     pacman.setScale(0.45f, 0.45f);
+    sf::Text browseIOS;
+    makeText(browseIOS, font, "Browse All Mobile Games", 15, 400, 100);
     sf::Sprite shield;
     shield = sf::Sprite(TextureManager::GetTexture("shield"));
-    shield.setPosition(550, 0);
+    shield.setPosition(450, 0);
     shield.setScale(0.45f, 0.45f);
+    sf::Text aboutUS;
+    makeText(aboutUS, font, "About the Developers", 15, 950, 100);
     sf::Sprite pokeball;
     pokeball = sf::Sprite(TextureManager::GetTexture("pokeball"));
-    pokeball.setPosition(750, 0);
+    pokeball.setPosition(1000, 0);
     pokeball.setScale(0.45f, 0.45f);
     bool pokeballClicked = false;
     bool shieldClicked = false;
@@ -241,10 +275,19 @@ static void makeGUI() {
     bowser.setPosition(50, 75);
     bowser.setScale(3.5f, 4.0f);
 
-    sf::Sprite chief;
-    chief = sf::Sprite(TextureManager::GetTexture("chief"));
-    chief.setPosition((height / 2), height / 2 + 100);
-    chief.setScale(0.5f, 0.5f);
+    sf::Text backButton;
+    makeText(backButton, font, "Back To Parameters", 20, width - 240, 80);
+    sf::Sprite crown;
+    crown = sf::Sprite(TextureManager::GetTexture("crown"));
+    crown.setPosition(width - 180, 110);
+    crown.setScale(0.5f, 0.5f);
+    bool crownClicked = false;
+    bool respawnClicked = false;
+
+//    sf::Sprite chief;
+//    chief = sf::Sprite(TextureManager::GetTexture("chief"));
+//    chief.setPosition((height / 2), height / 2 + 100);
+//    chief.setScale(0.5f, 0.5f);
     int maxNumBoxes = 0;
     int valBoxes = 1;
     int numBoxes = 1;
@@ -260,6 +303,9 @@ static void makeGUI() {
     while (window.isOpen()) {
         sf::Event event{};
         while (window.pollEvent(event)) {
+
+            //gui.handleEvent(event);
+
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
@@ -331,6 +377,12 @@ static void makeGUI() {
                     pacmanClicked = false;
                     shieldClicked = false;
                     pokeballClicked = false;
+                    respawnClicked = true;
+                    moreInfoClicked = false;
+                }
+                if (parametersQ && (validParametersConsole.getGlobalBounds().contains(coordinates.x, coordinates.y)
+                    || validParametersIOS.getGlobalBounds().contains(coordinates.x, coordinates.y))){
+                    moreInfoClicked = true;
                 }
                 //TODO: implement button functionality
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
@@ -341,6 +393,26 @@ static void makeGUI() {
                 }
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
+                }
+                if (crown.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    crownClicked = true;
+                    typeChosen = true;
+                    moreInfoClicked = false;
+                    parametersQ = false;
+                    selecting = true;
+                    searchTexts.clear();
+                    searchVals.clear();
+                    givenVals.clear();
+                    searchParams.clear();
+                    numBoxes = 1;
+                    valBoxes = 1;
+                    input.clear();
+                    cursor.setString("");
+                    cursor.setPosition(0, 0);
+                    cursor2.setString("");
+                    cursor2.setPosition(0,0);
+                    allowTextInput = true;
+                    displayStar = false;
                 }
                 if (console.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     typeConsole = true;
@@ -353,10 +425,13 @@ static void makeGUI() {
                 if (displayStar && (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y) ||
                     star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
                     displayStar = false;
+                    cursor.setString("|");
+                    cursor.setPosition(10,53);
                 }
                 if (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     isEditing = true;
-                    cursor.setString("");
+                    cursor.setString("|");
+                    cursor.setPosition(10, 53);
                     cursor2.setString("");
                 }
                 if (coal.getGlobalBounds().contains(coordinates.x, coordinates.y) && selecting) { //option 1
@@ -392,14 +467,16 @@ static void makeGUI() {
                             input += event.text.unicode;
                             cursor.setString(input + "|");
                             int increment = (numBoxes - 1) * 50;
-                            int x = 200 + increment;
-                            cursor.setPosition(525, x);
-                        } else {
+                            int x = 250 + increment;
+                            cursor.setPosition(475, x);
+                            respawnClicked = false;
+                            crownClicked = false;
+                        } else if (!respawnClicked && !crownClicked){
                             input += event.text.unicode;
                             cursor.setString(input + "|");
                             int increment = (numBoxes - 2) * 50;
-                            int x = 200 + increment;
-                            cursor.setPosition(845, x);
+                            int x = 250 + increment;
+                            cursor.setPosition(795, x);
                         }
                     }
                     if (valBoxes > maxNumBoxes) {
@@ -439,42 +516,51 @@ static void makeGUI() {
                         }
                     }
                     if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes + 1 && allowTextInput) {
-                        if (!parameterGiven) {
-                            searchParameter1 = input.toAnsiString();
-                            searchParams.push_back(searchParameter1);
-                            if (numBoxes > maxNumBoxes) {
-                                allowTextInput = false;
-                            }
-                            numBoxes++;
-                            parameterGiven = true;
-                            int increment = (numBoxes - 2) * 50;
-                            int x = 200 + increment;
-                            makeText(searchParameterDisplay, font, searchParameter1, 30, 525, x);
-                            //searchParameterDisplay.setStyle(sf::Text::Bold);
-                            input.clear();
-                            searchTexts.push_back(searchParameterDisplay);
-                            if (!searchParameter1.empty()) {
-                                transform(searchParameter1.begin(), searchParameter1.end(), searchParameter1.begin(),
-                                          [](unsigned char c) { return std::tolower(c); });
-                                cout << searchParameter1 << endl;
-                            }
-                        } else {
-                            valueToSearch = input.toAnsiString();
-                            givenVals.push_back(valueToSearch);
-                            if (valBoxes > maxNumBoxes) {
-                                allowTextInput = false;
-                            }
-                            valBoxes++;
-                            parameterGiven = false;
-                            input.clear();
-                            int increment = (numBoxes - 2) * 50;
-                            int x = 200 + increment;
-                            makeText(valueToSearchDisplay, font, valueToSearch, 25, 845, x);
-                            searchVals.push_back(valueToSearchDisplay);
-                            if (!valueToSearch.empty()) {
-                                transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
-                                          [](unsigned char c) { return std::tolower(c); });
-                                cout << valueToSearch << endl;
+//                        if(!crownClicked) {
+                            if (!parameterGiven) {
+                                searchParameter1 = input.toAnsiString();
+                                searchParams.push_back(searchParameter1);
+                                if (numBoxes > maxNumBoxes) {
+                                    allowTextInput = false;
+                                }
+                               // if (!crownClicked && !respawnClicked) {
+                                    numBoxes++;
+                                //}
+                                crownClicked = false;
+                                respawnClicked = false;
+                                parameterGiven = true;
+                                int increment = (numBoxes - 2) * 50;
+                                int x = 250 + increment;
+                                makeText(searchParameterDisplay, font, searchParameter1, 30, 475, x);
+                                //searchParameterDisplay.setStyle(sf::Text::Bold);
+                                input.clear();
+                                searchTexts.push_back(searchParameterDisplay);
+                                if (!searchParameter1.empty()) {
+                                    transform(searchParameter1.begin(), searchParameter1.end(),
+                                              searchParameter1.begin(),
+                                              [](unsigned char c) { return std::tolower(c); });
+                                    cout << searchParameter1 << endl;
+                                }
+                            } else {
+                                valueToSearch = input.toAnsiString();
+                                givenVals.push_back(valueToSearch);
+                                if (valBoxes > maxNumBoxes) {
+                                    allowTextInput = false;
+                                }
+                                if (!crownClicked && !respawnClicked) {
+                                    valBoxes++;
+                                }
+                                parameterGiven = false;
+                                input.clear();
+                                int increment = (numBoxes - 2) * 50;
+                                int x = 250 + increment;
+                                makeText(valueToSearchDisplay, font, valueToSearch, 25, 795, x);
+                                searchVals.push_back(valueToSearchDisplay);
+                                if (!valueToSearch.empty()) {
+                                    transform(valueToSearch.begin(), valueToSearch.end(), valueToSearch.begin(),
+                                              [](unsigned char c) { return std::tolower(c); });
+                                    cout << valueToSearch << endl;
+                                }
                             }
                         }
                     }
@@ -484,6 +570,8 @@ static void makeGUI() {
                         if (input.toAnsiString().length() > 20) {
                             titleSearch2 = input.substring(20).toAnsiString();
                             makeText(titleSearchDisplay2, font, titleSearch2, 23, 10, 83);
+                        } else {
+                            makeText(titleSearchDisplay2, font, "", 23, 10, 83);
                         }
                         input.clear();
                         if (!titleSearch.empty()){
@@ -497,19 +585,23 @@ static void makeGUI() {
                         cursor2.setString("");
                     }
                 }
-            }
+            //}
         }
         // order should be clear, draw display.
-        window.clear(sf::Color::Blue);
+        window.clear(sf::Color::Cyan);
         window.setView(view);
         window.draw(waterVaporText);
+        window.draw(browseConsole);
         window.draw(pacman);
+        window.draw(browseIOS);
         window.draw(shield);
+        window.draw(aboutUS);
         window.draw(pokeball);
-
         //search by title
         window.draw(sByTitle);
         window.draw(titleBox);
+        //gui.draw();
+
         if(isEditing && !parametersQ && !pacmanClicked && !shieldClicked && !pokeballClicked){
             window.draw(cursor);
             window.draw(cursor2);
@@ -522,10 +614,23 @@ static void makeGUI() {
 
         if (typeChosen && !pacmanClicked && !shieldClicked && !pokeballClicked) {
             if (parametersQ) {
-                // if (parameterGiven){
-                int y = 200;
+                window.draw(parameterType);
+                window.draw(valEntered);
+                if (typeConsole) {
+                    window.draw(validParametersConsole);
+                } else {
+                    window.draw(validParametersIOS);
+                }
+                if (moreInfoClicked && typeChosen){
+                    if(typeConsole){
+                        window.draw(moreInfoConsole);
+                    } else {
+                        window.draw(moreInfoIOS);
+                    }
+                }
+                int y = 250;
                 for (int i = 1; i <= valBoxes; i++) {
-                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
+                    makeInputBox(window, 200, 40, 795, y); // search boxes pop up
                     if (valBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
@@ -537,10 +642,12 @@ static void makeGUI() {
                 for (auto &iter: searchVals) { // search text display
                     window.draw(iter);
                 }
-                //} else {
-                y = 200;
+                window.draw(backButton);
+                window.draw(crown);
+                y = 250;
                 for (int i = 1; i <= numBoxes; i++) {
-                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
+                    window.draw(priorities[i - 1]);
+                    makeInputBox(window, 300, 40, 475, y); // search boxes pop up
                     if (numBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
@@ -552,7 +659,6 @@ static void makeGUI() {
                 for (auto &iter: searchTexts) { // search text display
                     window.draw(iter);
                 }
-                //}
             } else {
                 searchTexts.clear();
                 window.draw(initialQ);
@@ -569,7 +675,7 @@ static void makeGUI() {
             window.draw(nokia);
             window.draw(console);
         }
-        window.draw(chief);
+        //window.draw(chief);
         window.draw(respawn);
 
         //new window display
