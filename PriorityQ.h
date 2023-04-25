@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -23,11 +24,14 @@ private:
 
     Node* extractMin(){ //remove the root
         if (size == 1){
+            Node* root = pQ[0];
+            pQ.pop_back();
             size--;
             return pQ[0];
         }
         Node* root = pQ[0];
         pQ[0] = pQ[size - 1];
+        pQ.pop_back();
         size--;
         heapify(0);
         return root;
@@ -76,9 +80,14 @@ public:
     }
     ~PriorityQ() {
         for (Node* node: pQ) {
-            delete node;
+            if (node != nullptr) {
+                delete node;
+            }
         }
         pQ.clear();
+    }
+    int getSize() {
+        return size;
     }
     void insert(string data, string title){
         Node* node  = new Node;
@@ -99,7 +108,13 @@ public:
 
     string extractedVal(){
         Node* node = extractMin();
-        return node->title;
+        string title = node->title;
+        auto it = find(pQ.begin(), pQ.end(), node);
+        if (it != pQ.end()) {
+            *it = nullptr;
+        }
+        delete node;
+        return title;
     }
 };
 

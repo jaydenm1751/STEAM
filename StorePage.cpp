@@ -14,8 +14,6 @@
 #include "PriorityQ.h"
 #include <functional>
 #include <any>
-#include <TGUI/TGUI.hpp>
-
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
 
@@ -49,8 +47,6 @@ static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue)
         }
     }
 }
-
-// "price " == "price"
 
 //TODO: Implement the App hash table
 static void InitializeMapApp(unordered_map<string, AppNode*>& catalogue) {
@@ -303,9 +299,6 @@ static void makeGUI() {
     while (window.isOpen()) {
         sf::Event event{};
         while (window.pollEvent(event)) {
-
-            //gui.handleEvent(event);
-
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
@@ -585,7 +578,7 @@ static void makeGUI() {
                         cursor2.setString("");
                     }
                 }
-            //}
+            }
         }
         // order should be clear, draw display.
         window.clear(sf::Color::Cyan);
@@ -600,8 +593,6 @@ static void makeGUI() {
         //search by title
         window.draw(sByTitle);
         window.draw(titleBox);
-        //gui.draw();
-
         if(isEditing && !parametersQ && !pacmanClicked && !shieldClicked && !pokeballClicked){
             window.draw(cursor);
             window.draw(cursor2);
@@ -630,7 +621,7 @@ static void makeGUI() {
                 }
                 int y = 250;
                 for (int i = 1; i <= valBoxes; i++) {
-                    makeInputBox(window, 200, 40, 795, y); // search boxes pop up
+                    makeInputBox(window, 200, 40, 845, y); // search boxes pop up
                     if (valBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
@@ -646,8 +637,7 @@ static void makeGUI() {
                 window.draw(crown);
                 y = 250;
                 for (int i = 1; i <= numBoxes; i++) {
-                    window.draw(priorities[i - 1]);
-                    makeInputBox(window, 300, 40, 475, y); // search boxes pop up
+                    makeInputBox(window, 300, 40, 525, y); // search boxes pop up
                     if (numBoxes <= maxNumBoxes) {
                         window.draw(cursor); //cursor tracts
                     }
