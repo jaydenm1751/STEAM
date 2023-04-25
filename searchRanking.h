@@ -1,0 +1,22 @@
+//
+// Created by caleb on 4/24/2023.
+//
+
+#ifndef SEARCH_RANKING_H
+#define SEARCH_RANKING_H
+
+#include "ConsoleAppsNodes.cpp"
+#include "searchRanking.h"
+#include <unordered_map>
+#include <iostream>
+#include <any>
+#include <functional>
+#include "PriorityQ.h"
+#include <iomanip>
+
+
+void searchRanking(bool console, unordered_map<string, ConsoleNode*>& ConsoleGames, unordered_map<string, AppNode*> AppGames, vector<string>& searchParams, vector<string>& givenVals);
+
+//string anyToString(const any& value);
+
+#endif

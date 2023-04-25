@@ -14,24 +14,25 @@ struct AppNode {
     string iconURL;
     float rating;
     int ratingCount;
-    float price;
-    vector<float> inAppPurchases;
+    float price; //search
+    vector<float> inAppPurchases; //search
     string developer;
-    string age;
+    string age; //search
     vector<string> languages;
-    unsigned long long size;
-    vector<string> genres;
+    unsigned long long size; //search
+    vector<string> genres; //search
     string releaseDate;
-    string updateData;
+    string updateData; //search
 };
 
 struct ConsoleNode {
     string Title;
     int players{}; //search if it is single player or coop (1 or more than 1)
+    bool singlePlayer{};
     bool online{}; //search
     vector<string> genres; //search
     string publishers;
-    int review{};
+    float review{}; //search
     float sales{};
     float price{}; //search
     vector<string> console; //search
@@ -143,6 +144,11 @@ static void insertConsoleData(vector<string>& data, unordered_map<string, Consol
         catalogue[key]->Title = data.at(0);
         //cout << catalogue.size() << "\t" << data.at(0) << "\t\t\t" << data.at(1) << "\t" << data.at(8) << endl;
         catalogue[key]->players = stoi(data.at(1));
+        if(stoi(data.at(1)) == 1) {
+            catalogue[key]->singlePlayer = true;
+        } else {
+            catalogue[key]->singlePlayer = false;
+        }
         catalogue[key]->online = (data.at(2) == "TRUE");
         if (data.at(index).find("\"") == 0) {
             catalogue[key]->genres.push_back(data.at(index).substr(1));

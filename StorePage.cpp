@@ -6,14 +6,11 @@
 #include "TextureManager.h"
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
-#include "ConsoleAppsNodes.cpp"
 #include <stdexcept>
 #include <chrono>
 #include <fstream>
 #include <sstream>
-#include "PriorityQ.h"
-#include <functional>
-#include <any>
+#include "searchRanking.h"
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
 
@@ -104,34 +101,6 @@ static void makeInputBox(sf::RenderWindow& window, int sizeX, int sizeY, int wid
 static void makeGUI() {
     unordered_map <string, ConsoleNode*> ConsoleGames;
     unordered_map <string, AppNode*> AppGames;
-    PriorityQ q1;
-    PriorityQ q2;
-    PriorityQ q3;
-    PriorityQ q4;
-    unordered_map <string, function<any(const ConsoleNode&)>> consoleTraits = {
-            {"title", [](const ConsoleNode& node) -> string { return node.Title; }},
-            {"players", [](const ConsoleNode& node) -> int { return node.players; }},
-            {"online", [](const ConsoleNode& node) -> bool { return node.online; }},
-            {"genres", [](const ConsoleNode& node) -> vector<string> { return node.genres; }},
-            {"price", [](const ConsoleNode& node) -> float { return node.price; }},
-            {"console", [](const ConsoleNode& node) -> vector<string> { return node.console; }},
-            {"rating", [](const ConsoleNode& node) -> string { return node.rating; }},
-            {"release", [](const ConsoleNode& node) -> float { return node.release; }},
-    };
-    unordered_map<std::string, std::function<std::any(const AppNode&)>> appTraits = {
-            {"title", [](const AppNode& node) -> std::any { return node.Title; }},
-            {"rating", [](const AppNode& node) -> float { return node.rating; }},
-            {"ratingCount", [](const AppNode& node) -> int { return node.ratingCount; }},
-            {"price", [](const AppNode& node) -> float { return node.price; }},
-            {"inAppPurchases", [](const AppNode& node) -> std::any { return node.inAppPurchases; }},
-            {"developer", [](const AppNode& node) -> std::any { return node.developer; }},
-            {"age", [](const AppNode& node) -> std::any { return node.age; }},
-            {"languages", [](const AppNode& node) -> std::any { return node.languages; }},
-            {"size", [](const AppNode& node) -> std::any { return node.size; }},
-            {"genres", [](const AppNode& node) -> std::any { return node.genres; }},
-            {"releaseDate", [](const AppNode& node) -> std::any { return node.releaseDate; }},
-            {"updateData", [](const AppNode& node) -> std::any { return node.updateData; }},
-    };
 
     auto start_time = chrono::steady_clock::now();
     InitializeMapApp(AppGames);
@@ -194,8 +163,8 @@ static void makeGUI() {
     diamond.setPosition(560, 420);
     diamond.setScale(0.20f, 0.20f);
     sf::Sprite respawn = sf::Sprite(TextureManager::GetTexture("respawn"));
-    respawn.setScale(0.4f, 0.5f);
-    respawn.setPosition(width - 270, 0);
+    respawn.setScale(0.5f, 0.5f);
+    respawn.setPosition(width - 310, 0);
     bool parametersQ = false;
 
     sf::Sprite console = sf::Sprite(TextureManager::GetTexture("console"));
@@ -324,35 +293,7 @@ static void makeGUI() {
                     parametersQ = false;
                     searchTexts.clear();
                     searchVals.clear();
-                    for (int j = 0; j < searchParams.size(); j++) {
-                        auto iter = ConsoleGames.begin();
-                        string param = searchParams.at(j);
-                        transform(param.begin(), param.end(), param.begin(),
-                                  [](unsigned char c) { return std::tolower(c); });
-                        //TODO: Have input handling for all possible search parameters
-                        if (param == "price" || param == "release") {
-                            while (iter != ConsoleGames.end()) {
-                                float gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
-                                float queueVal = abs(stof(givenVals.at(j)) - gameTraitValue);
-                                if (j == 0)
-                                    q1.insert(to_string(queueVal), iter->second->Title);
-                                else if (j == 1)
-                                    q2.insert(to_string(queueVal), iter->second->Title);
-                                else if (j == 2)
-                                    q3.insert(to_string(queueVal), iter->second->Title);
-                                else
-                                    q4.insert(to_string(queueVal), iter->second->Title);
-                                iter++;
-                            }
-                            for (int i = 0; i < 100; i++) {
-                                string key = q1.extractedVal();
-                                transform(key.begin(), key.end(), key.begin(),
-                                          [](unsigned char c) { return std::tolower(c); });
-                                cout << ConsoleGames[key]->Title << "\t\t" << ConsoleGames[key]->rating << "\n";
-                            }
-                        }
-                        cout << "Here is 100 games that fit your preferences of " << searchParams.at(j) << "\n";
-                    }
+                    searchRanking(typeConsole,ConsoleGames, AppGames, searchParams, givenVals);
                     givenVals.clear();
                     searchParams.clear();
                     numBoxes = 1;
