@@ -51,12 +51,18 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
             } else if (param == "age rating" || param == "genre" || param == "update year") {
                 if (param == "age rating") {
                     val = (val.find('+') == val.back()) ? val.substr(0,val.size()-1) : val;
-                    while (iter != AppGames.end()) {
-                        auto gameTraitValue = any_cast<string>(appTraits[param](*iter->second));
-                        gameTraitValue = (gameTraitValue.find('+') == gameTraitValue.back()) ? gameTraitValue.substr(0,gameTraitValue.size() - 1) : gameTraitValue;
-                        int queueVal = abs(stoi(val) - stoi(gameTraitValue));
-                        pQ.insert(to_string(queueVal), iter->first);
-                        iter++;
+                    try {
+                        int intVal = stoi(val);
+                        while (iter != AppGames.end()) {
+                            auto gameTraitValue = any_cast<string>(appTraits[param](*iter->second));
+                            gameTraitValue = (gameTraitValue.find('+') == gameTraitValue.back()) ? gameTraitValue.substr(0,gameTraitValue.size() - 1) : gameTraitValue;
+                            int queueVal = abs(intVal - stoi(gameTraitValue));
+                            pQ.insert(to_string(queueVal), iter->first);
+                            iter++;
+                        }
+                    } catch (const exception& e) {
+                        cout << "Error occurred while casting val (" + val + "): " << e.what() << '\n';
+
                     }
                 } else if (param == "genre") {
                     while (iter != AppGames.end()) {
@@ -73,12 +79,17 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
                         iter++;
                     }
                 } else {
-                    while (iter != AppGames.end()) {
-                        auto year = any_cast<string>(appTraits[param](*iter->second));
-                        year = year.substr(year.size() - 4, 4);
-                        int queueVal = abs((stoi(val) - stoi(year)));
-                        pQ.insert(to_string(queueVal), iter->first);
-                        iter++;
+                    try {
+                        int intVal = stoi(val);
+                        while (iter != AppGames.end()) {
+                            auto year = any_cast<string>(appTraits[param](*iter->second));
+                            year = year.substr(year.size() - 4, 4);
+                            int queueVal = abs(intVal - stoi(year));
+                            pQ.insert(to_string(queueVal), iter->first);
+                            iter++;
+                        }
+                    } catch (const exception& e) {
+                        cout << "Error occurred while casting val (" + val + "): " << e.what() << '\n';
                     }
                 }
             } else if (param == "in-app purchases") {
@@ -95,11 +106,16 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
                     iter++;
                 }
             } else {
-                while (iter != AppGames.end()) {
-                    auto gameTraitValue = any_cast<double>(appTraits[param](*iter->second));
-                    double queueVal = abs(stod(val) - gameTraitValue);
-                    pQ.insert(to_string(queueVal), iter->first);
-                    iter++;
+                try {
+                    double doubleVal = stod(val);
+                    while (iter != AppGames.end()) {
+                        auto gameTraitValue = any_cast<double>(appTraits[param](*iter->second));
+                        double queueVal = abs(doubleVal - gameTraitValue);
+                        pQ.insert(to_string(queueVal), iter->first);
+                        iter++;
+                    }
+                } catch (const exception& e){
+                    cout << "Error occurred while casting val (" + val + "): " << e.what() << '\n';
                 }
             }
             if (param != "in-app purchases" && param != "genre") {
