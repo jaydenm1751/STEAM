@@ -13,7 +13,6 @@
 #include "searchRanking.h"
 
 static void InitializeMapConsole(unordered_map<string, ConsoleNode*>& catalogue) {
-
     string path = "files/ConsoleStoreGames.csv";
     ifstream storeFile(path);
 
@@ -147,6 +146,28 @@ static void makeGUI() {
             {"Age Rating", [](const ConsoleNode& node) -> string { return node.rating; }},
             {"Release Year", [](const ConsoleNode& node) -> string { return to_string(node.release).substr(0, 4); }},
     };
+
+    PriorityQ q(false);
+    auto iterrrr = ConsoleGames.begin();
+    while(iterrrr != ConsoleGames.end()){
+        q.insert(to_string(iterrrr->second->sales), iterrrr->first);
+        iterrrr++;
+    }
+    vector<sf::Text> grossing;
+    int grossingY = 300;
+    sf::Text headerOfGrossing;
+    makeText(headerOfGrossing, font, "The current top selling games (millions)", 17, 1095, grossingY - 30);
+    for (int i = 0; i < 10; i++){
+        sf::Text line;
+        string key = q.extractedVal();
+        string sale = to_string(ConsoleGames[key]->sales);
+        int index = sale.find('.');
+        sale = sale.substr(0, index + 3);
+        string topGames = to_string(i + 1) + ".) " + ConsoleGames[key]->Title + " - " + sale;
+        makeText(line, font, topGames, 15, 1100, grossingY);
+        grossingY += 25;
+        grossing.push_back(line);
+    }
     //window dimensions
     int width = 1500;
     int height = 850;
@@ -300,6 +321,15 @@ static void makeGUI() {
     bool shieldClicked = false;
     bool pacmanClicked = false;
 
+    sf::Sprite sus = sf::Sprite(TextureManager::GetTexture("sus"));
+    sus.setPosition(200, 220);
+    sus.setScale(0.70f, 0.70f);
+    sf::Sprite fortnite = sf::Sprite(TextureManager::GetTexture("fortnite"));
+    fortnite.setPosition(1100, 200);
+    fortnite.setScale(0.30f, 0.30f);
+    bool susClicked = false;
+    bool fortniteClicked = false;
+
     //BOWSER
     sf::Sprite bowser;
     bowser = sf::Sprite(TextureManager::GetTexture("bowser"));
@@ -316,10 +346,10 @@ static void makeGUI() {
     bool respawnClicked = false;
 
     //figure out where to put the chief
-//    sf::Sprite chief;
-//    chief = sf::Sprite(TextureManager::GetTexture("chief"));
-//    chief.setPosition((height / 2), height / 2 + 100);
-//    chief.setScale(0.5f, 0.5f);
+    sf::Sprite chief;
+    chief = sf::Sprite(TextureManager::GetTexture("chief"));
+    chief.setPosition((height / 2), height / 2 + 100);
+    chief.setScale(0.5f, 0.5f);
     int maxNumBoxes = 0;
     int valBoxes = 1;
     int numBoxes = 1;
@@ -365,7 +395,6 @@ static void makeGUI() {
 
                 // Convert the mouse position to the view's coordinates space
                 sf::Vector2f mousePosView = window.mapPixelToCoords(coordinates, view);
-
                 //cout << coordinates.x << ", " << coordinates.y << endl;
                 if (respawn.getGlobalBounds().contains(mousePosView)) {
                     //TODO: clear out text boxes, equivalent to start over
@@ -804,7 +833,7 @@ static void makeGUI() {
                             bool appExists = true;
                             if (consoleTraits.find(searchParameter1) == consoleTraits.end()){
                                 consoleExists = false;
-                            } if (appTraits.find(searchParameter1) == appTraits.end()){
+                            } if (appTraits.find(searchParameter1) == appTraits.end() && !(searchParameter1 == "Update Year")){
                                 appExists = false;
                             }
                             if ((!consoleExists && !appExists) || (typeConsole && !consoleExists) || (!typeConsole && !appExists)){
@@ -1092,10 +1121,21 @@ static void makeGUI() {
             window.draw(nokia);
             window.draw(console);
         }
-        //window.draw(chief);
-
+        if (!pacmanClicked && !pokeballClicked && !shieldClicked && !searchButtonPressed) {
+            if(!typeChosen && !displayStar) {
+                window.draw(chief);
+            }
+            window.draw(headerOfGrossing);
+            for (auto& iter : grossing){
+                window.draw(iter);
+            }
+        }
+        if (pokeballClicked){
+            window.draw(sus);
+            window.draw(fortnite);
+        }
         //new window display
-        if (pacmanClicked || pokeballClicked || shieldClicked){ //display god
+        if (pacmanClicked || shieldClicked){ //display god
             //window.draw(bowser);
             for (sf::Text& item : allGames) {
                 window.draw(item);
