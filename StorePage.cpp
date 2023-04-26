@@ -227,6 +227,7 @@ static void makeGUI() {
     respawn.setScale(0.5f, 0.5f);
     respawn.setPosition(width - 310, 0);
     bool parametersQ = false;
+    int jm = 0;
 
     // home page buttons show what to search
     sf::Sprite console = sf::Sprite(TextureManager::GetTexture("console"));
@@ -1140,11 +1141,14 @@ static void makeGUI() {
             if(!typeChosen && !displayStar) {
                 window.draw(chief);
             }
+            ///epic
             window.draw(headerOfGrossing);
             for (auto& iter : grossing){
                 window.draw(iter);
             }
         }
+        //epic
+        //epic
         if (susClicked && !displayStar && !shieldClicked && !pacmanClicked){
             window.draw(sus);
             window.draw(jayden);
