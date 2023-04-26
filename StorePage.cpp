@@ -322,13 +322,15 @@ static void makeGUI() {
     bool pacmanClicked = false;
 
     sf::Sprite sus = sf::Sprite(TextureManager::GetTexture("sus"));
-    sus.setPosition(200, 220);
-    sus.setScale(0.70f, 0.70f);
+    sus.setScale(0.7f, 0.7f);
     sf::Sprite fortnite = sf::Sprite(TextureManager::GetTexture("fortnite"));
     fortnite.setPosition(1100, 200);
     fortnite.setScale(0.30f, 0.30f);
     bool susClicked = false;
     bool fortniteClicked = false;
+
+    sf::Sprite developers = sf::Sprite(TextureManager::GetTexture("aboutUS"));
+    developers.setPosition(225, 305);
 
     //BOWSER
     sf::Sprite bowser;
@@ -360,6 +362,8 @@ static void makeGUI() {
     vector <sf::Text> searchVals;
     vector <sf::Text> searchOfGames;
     bool parameterGiven = false;
+
+    sf::Sprite jayden = sf::Sprite(TextureManager::GetTexture("jayden"));
 
     vector<sf::Text> allGames;
 
@@ -424,6 +428,7 @@ static void makeGUI() {
                     pokeballClicked = false;
                     respawnClicked = true;
                     moreInfoClicked = false;
+                    susClicked = false;
                     titleSearchTraits.clear();
                     searchButtonPressed = false;
                     searchOfGames.clear();
@@ -465,16 +470,22 @@ static void makeGUI() {
                     }
                 }
                 if (sus.getGlobalBounds().contains(coordinates.x, coordinates.y)){
-                    susClicked = false;
+                    susClicked = true;
+                    sus.setPosition(635, 220);
+                    jayden.setPosition(210, 400);
+                    //jayden.setScale(1.0f, 0.75f);
                 }
                 if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pokeballClicked = true;
+                    susClicked = false;
                     shieldClicked = false;
                     pacmanClicked = false;
+                    sus.setPosition(200, 220);
                 }
 
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
+                    susClicked = false;
                     parametersQ = false;
                     allGames.clear();
                     auto iter = AppGames.begin();
@@ -1134,7 +1145,13 @@ static void makeGUI() {
                 window.draw(iter);
             }
         }
-        if (pokeballClicked && !pacmanClicked && !shieldClicked && !displayStar){
+        if (susClicked && !displayStar && !shieldClicked && !pacmanClicked){
+            window.draw(sus);
+            window.draw(jayden);
+        }
+        if (pokeballClicked && !pacmanClicked && !shieldClicked && !displayStar
+            && !susClicked && !fortniteClicked){
+            window.draw(developers);
             window.draw(sus);
             window.draw(fortnite);
         }
