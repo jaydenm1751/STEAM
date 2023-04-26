@@ -13,7 +13,7 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
     unordered_map<string, function<any(const AppNode&)>> appTraits = {
             {"review", [](const AppNode& node) -> float { return node.rating; }},
             {"price", [](const AppNode& node) -> float { return node.price; }},
-            {"in-app purchases", [](const AppNode& node) -> bool { return node.inAppPurchases.at(0) == "0"; }},
+            {"in-app purchases", [](const AppNode& node) -> bool { return node.inAppPurchases.at(0) == "0.00"; }},
             {"age rating", [](const AppNode& node) -> string { return node.age; }},
             {"size", [](const AppNode& node) -> double { return stod(node.size); }},
             {"genre", [](const AppNode& node) -> vector<string> { return node.genres; }},
@@ -84,11 +84,11 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
             } else if (param == "in-app purchases") {
                 while (iter != AppGames.end()) {
                     if (val == "y" || val == "yes") {
-                        if (any_cast<bool>(appTraits[param](*iter->second))) {
+                        if (!any_cast<bool>(appTraits[param](*iter->second))) {
                             titles.push_back(iter->first);
                         }
                     } else {
-                        if (!any_cast<bool>(appTraits[param](*iter->second))) {
+                        if (any_cast<bool>(appTraits[param](*iter->second))) {
                             titles.push_back(iter->first);
                         }
                     }
@@ -109,7 +109,7 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
                 double normalizeFactor =  500.0 / size;
                 for (int i = 0; i < size; i++) {
                     string key = pQ.extractedVal();
-                    mappedRanks[key] += (float)((size - i) / 500.0 * normalizeFactor) * (float)(4 - j);
+                    mappedRanks[key] += (float)((size - i) / 500.0 * normalizeFactor) * (float)((4 - j) * 2);
                     //cout << ConsoleGames[key]->Title << "\t\t" << anyToString(consoleTraits[param](*ConsoleGames[key])) << "\n";
                 }
                 cout << "Here is " << size << " game(s) that fit your preferences of " << param << "\n";
@@ -118,7 +118,7 @@ vector<AppNode*> searchAppRanking(unordered_map<string, AppNode*>& AppGames, vec
                 double normalizeFactor =  500.0 / size;
                 for (unsigned int i = 0; i < size; i++) {
                     string key = titles.at(i);
-                    mappedRanks[key] += (float)((size - i) / 500.0 * normalizeFactor) * (float)(4 - j);
+                    mappedRanks[key] += (float)((size - i) / 500.0 * normalizeFactor) * (float)((4 - j) * 2);
                 }
                 cout << "Here is " << size << " game(s) that fit your preferences of " << param << "\n";
             }
