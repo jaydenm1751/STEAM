@@ -547,12 +547,16 @@ static void makeGUI() {
                             makeText(currentGame, font, line, 25, 490, y + 75);
                             searchOfGames.push_back(currentGame);
 
+                            line = "Age Rating: " + game[i]->rating;
+                            makeText(currentGame, font, line, 25, 490, y + 100);
+                            searchOfGames.push_back(currentGame);
+
                             line = "Release Year: ";
                             temp = to_string(game[i]->release);
                             index = temp.find('.');
                             temp = temp.substr(0, index);
                             line += temp;
-                            makeText(currentGame, font, line, 25, 490, y + 100);
+                            makeText(currentGame, font, line, 25, 490, y + 125);
                             searchOfGames.push_back(currentGame);
 
                             line.clear();
@@ -564,7 +568,7 @@ static void makeGUI() {
                                 }
                                 line += game[i]->publishers[j] + ", ";
                             }
-                            makeText(currentGame, font, line, 25, 490, y + 125);
+                            makeText(currentGame, font, line, 25, 490, y + 150);
                             searchOfGames.push_back(currentGame);
 
                             line.clear();
@@ -576,9 +580,9 @@ static void makeGUI() {
                                 }
                                 line += game[i]->console[j] + ", ";
                             }
-                            makeText(currentGame, font, line, 25, 490, y + 150);
+                            makeText(currentGame, font, line, 25, 490, y + 175);
                             searchOfGames.push_back(currentGame);
-                            y += 225;
+                            y += 250;
                         }
                     } else {
                         auto game = any_cast<vector<AppNode*>>(searchRanking(typeConsole, ConsoleGames, AppGames, searchParams, givenVals));
