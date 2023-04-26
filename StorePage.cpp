@@ -464,11 +464,15 @@ static void makeGUI() {
                         yPos += 30;
                     }
                 }
-                //TODO: About developers (if time)
+                if (sus.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    susClicked = false;
+                }
                 if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pokeballClicked = true;
+                    shieldClicked = false;
+                    pacmanClicked = false;
                 }
-                //TODO: Display all 17k app games
+
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
                     parametersQ = false;
@@ -1130,7 +1134,7 @@ static void makeGUI() {
                 window.draw(iter);
             }
         }
-        if (pokeballClicked){
+        if (pokeballClicked && !pacmanClicked && !shieldClicked && !displayStar){
             window.draw(sus);
             window.draw(fortnite);
         }
