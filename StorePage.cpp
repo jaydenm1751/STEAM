@@ -253,6 +253,15 @@ static void makeGUI() {
     makeText(errorTitle, font, "This game is not in our Library.", 18, 0, 113);
     errorTitle.setStyle(sf::Text::Bold);
 
+    sf::Sprite notFound;
+    notFound = sf::Sprite(TextureManager::GetTexture("notFound"));
+    notFound.setPosition(300, 300);
+    notFound.setScale(3.0f, 3.0f);
+    sf::Text notFoundText;
+    makeText(notFoundText, font, "Sorry there were no results with the value(s) you listed. "
+                                 "Make sure your search value is correct and valid.", 20, 105, 250);
+    bool notFoundClicked = false;
+
     sf::Sprite searchButton = sf::Sprite(TextureManager::GetTexture("search"));
     searchButton.setScale(0.25, 0.25);
     bool searchButtonPressed = false;
@@ -338,16 +347,16 @@ static void makeGUI() {
                 // Check the movement direction
                 if (event.mouseWheel.delta > 0) {
                     sf::Vector2f viewPos = view.getCenter();
-                    view.move(0, -50);
-                    respawn.move(0, -50);
+                    view.move(0, -100);
+                    respawn.move(0, -100);
                     if (view.getCenter().y - view.getSize().y / 2 < 0){
                         view.setCenter(viewPos.x, view.getSize().y / 2);
                         respawn.setPosition(width - 310, 0);
                     }
                 }
                 else if (event.mouseWheel.delta < 0) {
-                    view.move(0, 50);
-                    respawn.move(0, 50);
+                    view.move(0, 100);
+                    respawn.move(0, 100);
                 }
             }
             if (event.type == sf::Event::MouseButtonPressed) {
@@ -397,6 +406,7 @@ static void makeGUI() {
                 //TODO: Display all console games
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pacmanClicked = true;
+                    parametersQ = false;
                     allGames.clear();
                     auto iter = ConsoleGames.begin();
                     int yPos = 250;
@@ -407,7 +417,7 @@ static void makeGUI() {
                         string price = to_string(iter->second->price).substr(0, point+3);
                         string review = to_string(iter->second->review).substr(0,2);
 
-                        string textLine = to_string(count) + ".)\tTitle: " + iter->second->Title + "\tPrice: $" + price + "\tPlatforms: ";
+                        string textLine = to_string(count) + ".)\tTitle: " + iter->second->Title + "\tPrice: $" + price + "\tPlatform(s): ";
                         for (unsigned int i = 0; i < iter->second->console.size(); i++) {
                             if (i == iter->second->console.size() - 1) {
                                 textLine += iter->second->console.at(i);
@@ -432,6 +442,7 @@ static void makeGUI() {
                 //TODO: Display all 17k app games
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
+                    parametersQ = false;
                     allGames.clear();
                     auto iter = AppGames.begin();
                     int yPos = 250;
@@ -446,16 +457,18 @@ static void makeGUI() {
 
 //                        point = price.find('.');
 //                        price = price.substr(0,point+3);
-                        string textLine = to_string(count) + ".) Title: " + iter->second->Title + "\tPrice: $" + price + "\tScore: " + rating
-                                + "\tDeveloper: " + iter->second->developer + "\tSize: " + size + "MB\n";
+                        string textLine = to_string(count) + ".) Title: " + iter->second->Title + "\tPrice: $" + price + "\tScore: " + rating;
                         makeText(game, font, textLine, 20, 75, yPos);
+                        allGames.push_back(game);
+                        textLine = "      Developer(s): " + iter->second->developer + "\tSize: " + size + "MB\n";
+                        makeText(game, font, textLine, 20, 75, yPos + 20);
                         allGames.push_back(game);
                         iter++;
                         count++;
-                        yPos += 30;
+                        yPos += 50;
                     }
                 }
-                if (crown.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if ((searchButtonPressed && searchOfGames.empty() && notFound.getGlobalBounds().contains(coordinates.x, coordinates.y)) || crown.getGlobalBounds().contains(coordinates.x, coordinates.y) && typeChosen && parametersQ){
                     crownClicked = true;
                     typeChosen = true;
                     moreInfoClicked = false;
@@ -479,16 +492,16 @@ static void makeGUI() {
                     searchButtonPressed = false;
                     searchOfGames.clear();
                 }
-                if (!displayStar && console.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if (!displayStar && console.getGlobalBounds().contains(coordinates.x, coordinates.y) && !typeChosen){
                     typeConsole = true;
                     typeChosen = true;
                 }
-                if (!displayStar && nokia.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if (!displayStar && nokia.getGlobalBounds().contains(coordinates.x, coordinates.y) && !typeChosen){
                     typeChosen = true;
                     typeConsole = false;
                 }
                 if (displayGoomba && (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y) ||
-                    star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
+                                      star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
                     displayStar = false;
                     cursor.setString("|");
                     cursor.setPosition(10,53);
@@ -516,7 +529,7 @@ static void makeGUI() {
                             temp = to_string(game[i]->price);
                             int index = temp.find('.');
                             temp = temp.substr(0, index + 3);
-                            line = "Price: " + temp;
+                            line = "Price: $" + temp;
                             makeText(currentGame, font, line, 25, 490, y + 25);
                             searchOfGames.push_back(currentGame);
 
@@ -580,19 +593,20 @@ static void makeGUI() {
                             temp = to_string(game[i]->price);
                             int index = temp.find('.');
                             temp = temp.substr(0, index + 3);
-                            line = "Price: " + temp;
+                            line = "Price: $" + temp;
                             makeText(currentGame, font, line, 25, 490, y + 25);
                             searchOfGames.push_back(currentGame);
 
                             //second line
-                            line = "In-App Purchases: ";
+                            line = "In-App Purchases: $";
                             int size = (game[i]->inAppPurchases.size() > 5) ? 5 : game[i]->inAppPurchases.size();
                             for (int j = 0; j < size; j++) {
-                                if (game[i]->inAppPurchases[j] == game[i]->inAppPurchases[size - 1]) {
-                                    line += game[i]->inAppPurchases[j];
+                                string price = (game[i]->inAppPurchases[j].find(' ') == 0) ? game[i]->inAppPurchases[j].substr(1) : game[i]->inAppPurchases[j];
+                                if (j == size - 1) {
+                                    line += price;
                                     continue;
                                 }
-                                line += game[i]->inAppPurchases[j] + ",";
+                                line += price + ", $";
                             }
                             line += (game[i]->inAppPurchases.size() > 5) ? ", ..." : "";
                             makeText(currentGame, font, line, 25, 490, y + 50);
@@ -760,6 +774,41 @@ static void makeGUI() {
                     if (!isEditing && event.key.code == sf::Keyboard::Enter && numBoxes <= maxNumBoxes + 1 && allowTextInput) {
                         if (!parameterGiven) { //the first input box
                             searchParameter1 = input.toAnsiString();
+                            if(searchParameter1.find('\r') == 0){
+                                searchParameter1 = searchParameter1.substr(1);
+                            }
+                            if (searchParameter1[searchParameter1.size() - 1] == ' '){
+                                searchParameter1 = searchParameter1.substr(0, searchParameter1.size() - 1);
+                            }
+                            bool capitalizeNext = false;
+                            searchParameter1[0] = toupper(searchParameter1[0]);
+                            for (int i = 1; i < searchParameter1.size(); i++) {
+                                char c = searchParameter1[i];
+                                if (c == ' ' || c == '-') {
+                                    capitalizeNext = true;
+                                } else if (capitalizeNext) {
+                                    if (searchParameter1[i] == searchParameter1.size() - 1){
+                                        continue;
+                                    }
+                                    searchParameter1[i] = toupper(searchParameter1[i]);
+                                    capitalizeNext = false;
+                                } else {
+                                    capitalizeNext = false;
+                                }
+                            }
+                            bool consoleExists = true;
+                            bool appExists = true;
+                            if (consoleTraits.find(searchParameter1) == consoleTraits.end()){
+                                consoleExists = false;
+                            } if (appTraits.find(searchParameter1) == appTraits.end()){
+                                appExists = false;
+                            }
+                            if ((!consoleExists && !appExists) || (typeConsole && !consoleExists) || (!typeConsole && !appExists)){
+                                input.clear();
+                                cursor.setString("|");
+                                cursor.setPosition(10, 53);
+                                continue;
+                            }
                             searchParams.push_back(searchParameter1);
                             if (numBoxes > maxNumBoxes) {
                                 allowTextInput = false;
@@ -863,14 +912,14 @@ static void makeGUI() {
                                     auto gameTraitValue = any_cast<vector<string>>(appTraits[traits1[i]](*foundVal->second));
                                     string s;
                                     int size = (gameTraitValue.size() > 5) ? 5 : gameTraitValue.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (gameTraitValue[size - 1] == gameTraitValue[j]) {
-                                                s += gameTraitValue[j];
-                                                continue;
-                                            }
-                                            s += gameTraitValue[j] + ",";
+                                    for (int j = 0; j < size; j++) {
+                                        if (gameTraitValue[size - 1] == gameTraitValue[j]) {
+                                            s += gameTraitValue[j];
+                                            continue;
                                         }
-                                        s += (gameTraitValue.size() > 5) ? ", ..." : "";
+                                        s += gameTraitValue[j] + ",";
+                                    }
+                                    s += (gameTraitValue.size() > 5) ? ", ..." : "";
                                     makeText(titleTraits, font, traits1[i] + ": " + s, 25, 545, y);
                                     titleSearchTraits.push_back(titleTraits);
                                 } else {
@@ -958,16 +1007,18 @@ static void makeGUI() {
             }
         }
 
-        if (typeChosen && typeConsole && !displayStar && !searchButtonPressed) {
-            //display of what is valid
-            window.draw(validParametersConsole);
-            if (moreInfoClicked){ // more info display pops up when clicked
-                window.draw(moreInfoConsole);
-            }
-        } else if (typeChosen && !typeConsole && !displayStar) {
-            window.draw(validParametersIOS);
-            if(moreInfoClicked) {
-                window.draw(moreInfoIOS);
+        if (!shieldClicked && !pacmanClicked && !pokeballClicked) {
+            if (typeChosen && typeConsole && !displayStar && !searchButtonPressed) {
+                //display of what is valid
+                window.draw(validParametersConsole);
+                if (moreInfoClicked) { // more info display pops up when clicked
+                    window.draw(moreInfoConsole);
+                }
+            } else if (typeChosen && !typeConsole && !displayStar && !searchButtonPressed) {
+                window.draw(validParametersIOS);
+                if (moreInfoClicked) {
+                    window.draw(moreInfoIOS);
+                }
             }
         }
 
@@ -1016,6 +1067,9 @@ static void makeGUI() {
                 } else {
                     for (auto &iter : searchOfGames){
                         window.draw(iter);
+                    } if (searchOfGames.empty()){
+                        window.draw(notFoundText);
+                        window.draw(notFound);
                     }
                 }
             } else {
