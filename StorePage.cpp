@@ -1168,7 +1168,6 @@ static void makeGUI() {
                 window.draw(item);
             }
         }
-        //epic
         window.draw(respawn); //home button
 
         window.display();
