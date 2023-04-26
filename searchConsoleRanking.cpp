@@ -130,7 +130,7 @@ vector<ConsoleNode*> searchConsoleRanking (unordered_map<string, ConsoleNode*>& 
                 double normalizeFactor =  100.0 / size;
                 for (int i = 0; i < size; i++) {
                     string key = pQ.extractedVal();
-                    mappedRanks[key] += (float)((size - i) / 100.0 * normalizeFactor) * (float)(4 - j);
+                    mappedRanks[key] += (float)((size - i) / 100.0 * normalizeFactor) * (float)((4 - j) * 2);
                     //cout << ConsoleGames[key]->Title << "\t\t" << anyToString(consoleTraits[param](*ConsoleGames[key])) << "\n";
                 }
                 cout << "Here is " << size << " game(s) that fit your preferences of " << param << "\n";
@@ -139,7 +139,7 @@ vector<ConsoleNode*> searchConsoleRanking (unordered_map<string, ConsoleNode*>& 
                 double normalizeFactor =  100.0 / size;
                 for (unsigned int i = 0; i < size; i++) {
                     string key = titles.at(i);
-                    mappedRanks[key] += (float)((size - i) / 100.0 * normalizeFactor) * (float)(4 - j);
+                    mappedRanks[key] += (float)((size - i) / 100.0 * normalizeFactor) * (float)((4 - j) * 2);
                 }
                 cout << "Here is " << size << " game(s) that fit your preferences of " << param << "\n";
             }
