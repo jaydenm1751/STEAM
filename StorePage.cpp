@@ -338,16 +338,16 @@ static void makeGUI() {
                 // Check the movement direction
                 if (event.mouseWheel.delta > 0) {
                     sf::Vector2f viewPos = view.getCenter();
-                    view.move(0, -50);
-                    respawn.move(0, -50);
+                    view.move(0, -100);
+                    respawn.move(0, -100);
                     if (view.getCenter().y - view.getSize().y / 2 < 0){
                         view.setCenter(viewPos.x, view.getSize().y / 2);
                         respawn.setPosition(width - 310, 0);
                     }
                 }
                 else if (event.mouseWheel.delta < 0) {
-                    view.move(0, 50);
-                    respawn.move(0, 50);
+                    view.move(0, 100);
+                    respawn.move(0, 100);
                 }
             }
             if (event.type == sf::Event::MouseButtonPressed) {
@@ -397,6 +397,7 @@ static void makeGUI() {
                 //TODO: Display all console games
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pacmanClicked = true;
+                    parametersQ = false;
                     allGames.clear();
                     auto iter = ConsoleGames.begin();
                     int yPos = 250;
@@ -407,7 +408,7 @@ static void makeGUI() {
                         string price = to_string(iter->second->price).substr(0, point+3);
                         string review = to_string(iter->second->review).substr(0,2);
 
-                        string textLine = to_string(count) + ".)\tTitle: " + iter->second->Title + "\tPrice: $" + price + "\tPlatforms: ";
+                        string textLine = to_string(count) + ".)\tTitle: " + iter->second->Title + "\tPrice: $" + price + "\tPlatform(s): ";
                         for (unsigned int i = 0; i < iter->second->console.size(); i++) {
                             if (i == iter->second->console.size() - 1) {
                                 textLine += iter->second->console.at(i);
@@ -432,6 +433,7 @@ static void makeGUI() {
                 //TODO: Display all 17k app games
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
+                    parametersQ = false;
                     allGames.clear();
                     auto iter = AppGames.begin();
                     int yPos = 250;
@@ -446,16 +448,18 @@ static void makeGUI() {
 
 //                        point = price.find('.');
 //                        price = price.substr(0,point+3);
-                        string textLine = to_string(count) + ".) Title: " + iter->second->Title + "\tPrice: $" + price + "\tScore: " + rating
-                                + "\tDeveloper: " + iter->second->developer + "\tSize: " + size + "MB\n";
+                        string textLine = to_string(count) + ".) Title: " + iter->second->Title + "\tPrice: $" + price + "\tScore: " + rating;
                         makeText(game, font, textLine, 20, 75, yPos);
+                        allGames.push_back(game);
+                        textLine = "      Developer(s): " + iter->second->developer + "\tSize: " + size + "MB\n";
+                        makeText(game, font, textLine, 20, 75, yPos + 20);
                         allGames.push_back(game);
                         iter++;
                         count++;
-                        yPos += 30;
+                        yPos += 50;
                     }
                 }
-                if (crown.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if (crown.getGlobalBounds().contains(coordinates.x, coordinates.y) && typeChosen && parametersQ){
                     crownClicked = true;
                     typeChosen = true;
                     moreInfoClicked = false;
@@ -479,16 +483,16 @@ static void makeGUI() {
                     searchButtonPressed = false;
                     searchOfGames.clear();
                 }
-                if (!displayStar && console.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if (!displayStar && console.getGlobalBounds().contains(coordinates.x, coordinates.y) && !typeChosen){
                     typeConsole = true;
                     typeChosen = true;
                 }
-                if (!displayStar && nokia.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                if (!displayStar && nokia.getGlobalBounds().contains(coordinates.x, coordinates.y) && !typeChosen){
                     typeChosen = true;
                     typeConsole = false;
                 }
                 if (displayGoomba && (titleBox.getGlobalBounds().contains(coordinates.x, coordinates.y) ||
-                    star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
+                                      star.getGlobalBounds().contains(coordinates.x, coordinates.y))){
                     displayStar = false;
                     cursor.setString("|");
                     cursor.setPosition(10,53);
@@ -516,7 +520,7 @@ static void makeGUI() {
                             temp = to_string(game[i]->price);
                             int index = temp.find('.');
                             temp = temp.substr(0, index + 3);
-                            line = "Price: " + temp;
+                            line = "Price: $" + temp;
                             makeText(currentGame, font, line, 25, 490, y + 25);
                             searchOfGames.push_back(currentGame);
 
@@ -580,19 +584,20 @@ static void makeGUI() {
                             temp = to_string(game[i]->price);
                             int index = temp.find('.');
                             temp = temp.substr(0, index + 3);
-                            line = "Price: " + temp;
+                            line = "Price: $" + temp;
                             makeText(currentGame, font, line, 25, 490, y + 25);
                             searchOfGames.push_back(currentGame);
 
                             //second line
-                            line = "In-App Purchases: ";
+                            line = "In-App Purchases: $";
                             int size = (game[i]->inAppPurchases.size() > 5) ? 5 : game[i]->inAppPurchases.size();
                             for (int j = 0; j < size; j++) {
-                                if (game[i]->inAppPurchases[j] == game[i]->inAppPurchases[size - 1]) {
-                                    line += game[i]->inAppPurchases[j];
+                                string price = (game[i]->inAppPurchases[j].find(' ') == 0) ? game[i]->inAppPurchases[j].substr(1) : game[i]->inAppPurchases[j];
+                                if (j == size - 1) {
+                                    line += price;
                                     continue;
                                 }
-                                line += game[i]->inAppPurchases[j] + ",";
+                                line += price + ", $";
                             }
                             line += (game[i]->inAppPurchases.size() > 5) ? ", ..." : "";
                             makeText(currentGame, font, line, 25, 490, y + 50);
@@ -863,14 +868,14 @@ static void makeGUI() {
                                     auto gameTraitValue = any_cast<vector<string>>(appTraits[traits1[i]](*foundVal->second));
                                     string s;
                                     int size = (gameTraitValue.size() > 5) ? 5 : gameTraitValue.size();
-                                        for (int j = 0; j < size; j++) {
-                                            if (gameTraitValue[size - 1] == gameTraitValue[j]) {
-                                                s += gameTraitValue[j];
-                                                continue;
-                                            }
-                                            s += gameTraitValue[j] + ",";
+                                    for (int j = 0; j < size; j++) {
+                                        if (gameTraitValue[size - 1] == gameTraitValue[j]) {
+                                            s += gameTraitValue[j];
+                                            continue;
                                         }
-                                        s += (gameTraitValue.size() > 5) ? ", ..." : "";
+                                        s += gameTraitValue[j] + ",";
+                                    }
+                                    s += (gameTraitValue.size() > 5) ? ", ..." : "";
                                     makeText(titleTraits, font, traits1[i] + ": " + s, 25, 545, y);
                                     titleSearchTraits.push_back(titleTraits);
                                 } else {
@@ -958,16 +963,18 @@ static void makeGUI() {
             }
         }
 
-        if (typeChosen && typeConsole && !displayStar && !searchButtonPressed) {
-            //display of what is valid
-            window.draw(validParametersConsole);
-            if (moreInfoClicked){ // more info display pops up when clicked
-                window.draw(moreInfoConsole);
-            }
-        } else if (typeChosen && !typeConsole && !displayStar && !searchButtonPressed) {
-            window.draw(validParametersIOS);
-            if(moreInfoClicked) {
-                window.draw(moreInfoIOS);
+        if (!shieldClicked && !pacmanClicked && !pokeballClicked) {
+            if (typeChosen && typeConsole && !displayStar && !searchButtonPressed) {
+                //display of what is valid
+                window.draw(validParametersConsole);
+                if (moreInfoClicked) { // more info display pops up when clicked
+                    window.draw(moreInfoConsole);
+                }
+            } else if (typeChosen && !typeConsole && !displayStar && !searchButtonPressed) {
+                window.draw(validParametersIOS);
+                if (moreInfoClicked) {
+                    window.draw(moreInfoIOS);
+                }
             }
         }
 
