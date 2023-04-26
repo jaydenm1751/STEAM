@@ -227,7 +227,6 @@ static void makeGUI() {
     respawn.setScale(0.5f, 0.5f);
     respawn.setPosition(width - 310, 0);
     bool parametersQ = false;
-    int jm = 0;
 
     // home page buttons show what to search
     sf::Sprite console = sf::Sprite(TextureManager::GetTexture("console"));
@@ -351,7 +350,7 @@ static void makeGUI() {
     //figure out where to put the chief
     sf::Sprite chief;
     chief = sf::Sprite(TextureManager::GetTexture("chief"));
-    chief.setPosition((height / 2), height / 2 + 100);
+    chief.setPosition((width / 2) - 370, height / 2 + 100);
     chief.setScale(0.5f, 0.5f);
     int maxNumBoxes = 0;
     int valBoxes = 1;
@@ -364,8 +363,11 @@ static void makeGUI() {
     vector <sf::Text> searchOfGames;
     bool parameterGiven = false;
 
-    sf::Sprite jayden = sf::Sprite(TextureManager::GetTexture("jayden"));
+    sf::Sprite caleb;
+    caleb = sf::Sprite(TextureManager::GetTexture("calebabout"));
+    caleb.setPosition(355, 400);
 
+    sf::Sprite jayden = sf::Sprite(TextureManager::GetTexture("jayden"));
     vector<sf::Text> allGames;
 
     // Store the initial view windows position to come back to later
@@ -427,6 +429,8 @@ static void makeGUI() {
                     pacmanClicked = false;
                     shieldClicked = false;
                     pokeballClicked = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     respawnClicked = true;
                     moreInfoClicked = false;
                     susClicked = false;
@@ -442,6 +446,8 @@ static void makeGUI() {
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pacmanClicked = true;
                     parametersQ = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     allGames.clear();
                     auto iter = ConsoleGames.begin();
                     int yPos = 250;
@@ -472,15 +478,23 @@ static void makeGUI() {
                 }
                 if (sus.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     susClicked = true;
+                    fortniteClicked = false;
                     sus.setPosition(635, 220);
                     jayden.setPosition(210, 400);
                     //jayden.setScale(1.0f, 0.75f);
+                }
+                if (fortnite.getGlobalBounds().contains(coordinates.x, coordinates.y)) {
+                    fortniteClicked = true;
+                    susClicked = false;
+                    fortnite.setPosition(635, 220);
                 }
                 if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pokeballClicked = true;
                     susClicked = false;
                     shieldClicked = false;
                     pacmanClicked = false;
+                    fortniteClicked = false;
+                    fortnite.setPosition(1100, 200);
                     sus.setPosition(200, 220);
                 }
 
@@ -488,6 +502,8 @@ static void makeGUI() {
                     shieldClicked = true;
                     susClicked = false;
                     parametersQ = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     allGames.clear();
                     auto iter = AppGames.begin();
                     int yPos = 250;
@@ -1160,6 +1176,10 @@ static void makeGUI() {
             window.draw(fortnite);
         }
         //new window display
+        if (fortniteClicked && !displayStar && !pacmanClicked && !shieldClicked) {
+            window.draw(fortnite);
+            window.draw(caleb);
+        }
         if (pacmanClicked || shieldClicked){ //display god
             //window.draw(bowser);
             for (sf::Text& item : allGames) {
