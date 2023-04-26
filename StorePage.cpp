@@ -1161,6 +1161,7 @@ static void makeGUI() {
             for (sf::Text& item : allGames) {
                 window.draw(item);
             }
+            //epic
         }
         window.draw(respawn); //home button
 
