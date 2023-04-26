@@ -8,6 +8,7 @@
 #include "ConsoleAppsNodes.h"
 using namespace std;
 
+
 vector<ConsoleNode*> searchConsoleRanking (unordered_map<string, ConsoleNode*>& ConsoleGames, vector<string>& searchParams, vector<string>& givenVals);
 
 #endif

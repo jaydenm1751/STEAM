@@ -3,7 +3,6 @@
 //
 
 #include "searchConsoleRanking.h"
-//#include <vector>
 #include <functional>
 #include "PriorityQ.h"
 #include <any>
@@ -48,11 +47,16 @@ vector<ConsoleNode*> searchConsoleRanking (unordered_map<string, ConsoleNode*>& 
             if (param == "price" || param == "release year" || param == "review" || param == "player count") {
                 //if statement for all the float based search parameters
                 // since they share operations
-                while (iter != ConsoleGames.end()) {
-                    auto gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
-                    float queueVal = abs(stof(val) - gameTraitValue);
-                    pQ.insert(to_string(queueVal), iter->first);
-                    iter++;
+                try {
+                    auto floatVal = stof(val);
+                    while (iter != ConsoleGames.end()) {
+                        auto gameTraitValue = any_cast<float>(consoleTraits[param](*iter->second));
+                        float queueVal = abs(floatVal - gameTraitValue);
+                        pQ.insert(to_string(queueVal), iter->first);
+                        iter++;
+                    }
+                } catch (const exception& e) {
+                    cout << "Error occurred while casting val (" + val + "): " << e.what() << '\n';
                 }
             } else if (param == "age rating" || param == "genre" || param == "platform") {
                 //if statement to handle all the string based search parameter

@@ -4,94 +4,97 @@
 #include "ConsoleAppsNodes.h"
 
 void insertAppData(vector<string>& data, unordered_map<string, AppNode*>& catalogue) {
-    if ((data.at(2).find("\\u") == string::npos) && (data.at(2).find("\\x") == string::npos) && (data.at(3).find("ht") == 0) && (data.at(2).find("\"") != 0)) {
-        string key = data.at(2);
-        int index = 7;
-        transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
-        catalogue.insert(make_pair(key, new AppNode));
-        //cout << catalogue.size() << "\t" << data.at(2) << "\t\t\t" << data.at(4) << "\t" << data.at(6) << endl;
-        catalogue[key]->url = data.at(0);
-        catalogue[key]->ID = stoi(data.at(1));
-        catalogue[key]->Title = data.at(2);
-        catalogue[key]->iconURL = data.at(3);
-        if (data.at(4) != "N/A") {
-            catalogue[key]->rating = stof(data.at(4));
-            catalogue[key]->ratingCount = stoi(data.at(5));
-        } else {
-            catalogue[key]->rating = 0.0;
-            catalogue[key]->ratingCount = 0;
-        }
-        catalogue[key]->price = stof(data.at(6));
-        if (data.at(index) == "N/A") {
-            catalogue[key]->inAppPurchases.emplace_back("0.00");
-            index++;
-        } else {
-            if (data.at(index).find("\"") == 0) {
-                catalogue[key]->inAppPurchases.push_back(data.at(index).substr(1));
+    string key = data.at(2);
+    transform(key.begin(), key.end(), key.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (catalogue.find(key) == catalogue.end()) {
+        if ((data.at(2).find("\\u") == string::npos) && (data.at(2).find("\\x") == string::npos) &&
+            (data.at(3).find("ht") == 0) && (data.at(2).find("\"") != 0)) {
+            int index = 7;
+            catalogue.insert(make_pair(key, new AppNode));
+            //cout << catalogue.size() << "\t" << data.at(2) << "\t\t\t" << data.at(4) << "\t" << data.at(6) << endl;
+            catalogue[key]->url = data.at(0);
+            catalogue[key]->ID = stoi(data.at(1));
+            catalogue[key]->Title = data.at(2);
+            catalogue[key]->iconURL = data.at(3);
+            if (data.at(4) != "N/A") {
+                catalogue[key]->rating = stof(data.at(4));
+                catalogue[key]->ratingCount = stoi(data.at(5));
+            } else {
+                catalogue[key]->rating = 0.0;
+                catalogue[key]->ratingCount = 0;
+            }
+            catalogue[key]->price = stof(data.at(6));
+            if (data.at(index) == "N/A") {
+                catalogue[key]->inAppPurchases.emplace_back("0.00");
                 index++;
-                while (true) {
-                    if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
-                        catalogue[key]->inAppPurchases.push_back(
-                                data.at(index).substr(0, data.at(index).size() - 1));
+            } else {
+                if (data.at(index).find("\"") == 0) {
+                    catalogue[key]->inAppPurchases.push_back(data.at(index).substr(1));
+                    index++;
+                    while (true) {
+                        if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                            catalogue[key]->inAppPurchases.push_back(
+                                    data.at(index).substr(0, data.at(index).size() - 1));
+                            index++;
+                            break;
+                        }
+                        catalogue[key]->inAppPurchases.push_back(data.at(index));
                         index++;
-                        break;
                     }
-                    catalogue[key]->inAppPurchases.push_back(data.at(index));
+                } else {
+                    catalogue[key]->inAppPurchases.push_back(data.at(7));
                     index++;
                 }
-            } else {
-                catalogue[key]->inAppPurchases.push_back(data.at(7));
-                index++;
             }
-        }
-        catalogue[key]->developer = data.at(index);
-        index++;
-        catalogue[key]->age = data.at(index);
-        index++;
-        if (data.at(index) == "N/A") {
-            catalogue[key]->languages.emplace_back("Unavailable");
+            catalogue[key]->developer = data.at(index);
             index++;
-        } else {
-            if (data.at(index).find("\"") == 0) {
-                catalogue[key]->languages.push_back(data.at(index).substr(1));
+            catalogue[key]->age = data.at(index);
+            index++;
+            if (data.at(index) == "N/A") {
+                catalogue[key]->languages.emplace_back("Unavailable");
                 index++;
-                while (true) {
-                    if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
-                        catalogue[key]->languages.push_back(data.at(index).substr(0, data.at(index).size() - 1));
+            } else {
+                if (data.at(index).find("\"") == 0) {
+                    catalogue[key]->languages.push_back(data.at(index).substr(1));
+                    index++;
+                    while (true) {
+                        if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                            catalogue[key]->languages.push_back(data.at(index).substr(0, data.at(index).size() - 1));
+                            index++;
+                            break;
+                        }
+                        catalogue[key]->languages.push_back(data.at(index));
                         index++;
-                        break;
                     }
+                } else {
                     catalogue[key]->languages.push_back(data.at(index));
                     index++;
                 }
-            } else {
-                catalogue[key]->languages.push_back(data.at(index));
-                index++;
             }
-        }
-        string sizeMB = to_string(stold(data.at(index)) / 1000000.0);
-        catalogue[key]->size = sizeMB;
-        index++;
-        if (data.at(index) == "N/A") {
-            catalogue[key]->genres.emplace_back("Unavailable");
-        } else {
-            if (data.at(index).find("\"") == 0) {
-                catalogue[key]->genres.push_back(data.at(index).substr(1));
-                index++;
-                while (true) {
-                    if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
-                        catalogue[key]->genres.push_back(data.at(index).substr(0, data.at(index).size() - 1));
-                        break;
-                    }
-                    catalogue[key]->genres.push_back(data.at(index));
+            string sizeMB = to_string(stold(data.at(index)) / 1000000.0);
+            catalogue[key]->size = sizeMB;
+            index++;
+            if (data.at(index) == "N/A") {
+                catalogue[key]->genres.emplace_back("Unavailable");
+            } else {
+                if (data.at(index).find("\"") == 0) {
+                    catalogue[key]->genres.push_back(data.at(index).substr(1));
                     index++;
+                    while (true) {
+                        if (data.at(index).find("\"", 1) == data.at(index).size() - 1) {
+                            catalogue[key]->genres.push_back(data.at(index).substr(0, data.at(index).size() - 1));
+                            break;
+                        }
+                        catalogue[key]->genres.push_back(data.at(index));
+                        index++;
+                    }
+                } else {
+                    catalogue[key]->genres.push_back(data.at(index));
                 }
-            } else {
-                catalogue[key]->genres.push_back(data.at(index));
             }
+            catalogue[key]->releaseDate = data.at(data.size() - 2);
+            catalogue[key]->updateData = data.back();
         }
-        catalogue[key]->releaseDate = data.at(data.size()-2);
-        catalogue[key]->updateData = data.back();
     }
 }
 

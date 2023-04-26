@@ -348,7 +348,7 @@ static void makeGUI() {
     //figure out where to put the chief
     sf::Sprite chief;
     chief = sf::Sprite(TextureManager::GetTexture("chief"));
-    chief.setPosition((height / 2), height / 2 + 100);
+    chief.setPosition((width / 2) - 370, height / 2 + 100);
     chief.setScale(0.5f, 0.5f);
     int maxNumBoxes = 0;
     int valBoxes = 1;
@@ -360,6 +360,10 @@ static void makeGUI() {
     vector <sf::Text> searchVals;
     vector <sf::Text> searchOfGames;
     bool parameterGiven = false;
+
+    sf::Sprite caleb;
+    caleb = sf::Sprite(TextureManager::GetTexture("calebabout"));
+    caleb.setPosition(355, 400);
 
     vector<sf::Text> allGames;
 
@@ -422,6 +426,8 @@ static void makeGUI() {
                     pacmanClicked = false;
                     shieldClicked = false;
                     pokeballClicked = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     respawnClicked = true;
                     moreInfoClicked = false;
                     titleSearchTraits.clear();
@@ -436,6 +442,8 @@ static void makeGUI() {
                 if (pacman.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pacmanClicked = true;
                     parametersQ = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     allGames.clear();
                     auto iter = ConsoleGames.begin();
                     int yPos = 250;
@@ -465,17 +473,27 @@ static void makeGUI() {
                     }
                 }
                 if (sus.getGlobalBounds().contains(coordinates.x, coordinates.y)){
+                    susClicked = true;
+                    fortniteClicked = false;
+                }
+                if (fortnite.getGlobalBounds().contains(coordinates.x, coordinates.y)) {
+                    fortniteClicked = true;
                     susClicked = false;
+                    fortnite.setPosition(635, 220);
                 }
                 if (pokeball.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     pokeballClicked = true;
                     shieldClicked = false;
                     pacmanClicked = false;
+                    fortniteClicked = false;
+                    fortnite.setPosition(1100, 200);
                 }
 
                 if (shield.getGlobalBounds().contains(coordinates.x, coordinates.y)){
                     shieldClicked = true;
                     parametersQ = false;
+                    fortniteClicked = false;
+                    susClicked = false;
                     allGames.clear();
                     auto iter = AppGames.begin();
                     int yPos = 250;
@@ -1134,11 +1152,16 @@ static void makeGUI() {
                 window.draw(iter);
             }
         }
-        if (pokeballClicked && !pacmanClicked && !shieldClicked && !displayStar){
+        if (pokeballClicked && !pacmanClicked && !shieldClicked && !displayStar
+            && !susClicked && !fortniteClicked){
             window.draw(sus);
             window.draw(fortnite);
         }
         //new window display
+        if (fortniteClicked && !displayStar && !pacmanClicked && !shieldClicked) {
+            window.draw(fortnite);
+            window.draw(caleb);
+        }
         if (pacmanClicked || shieldClicked){ //display god
             //window.draw(bowser);
             for (sf::Text& item : allGames) {
